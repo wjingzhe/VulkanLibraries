@@ -6,7 +6,7 @@
 #include "VulkanExampleBase.h"
 #include "vulkanglTFModel.h"
 
-#define ENABLE_VALIDATION false
+#define ENABLE_VALIDATION true
 
 // Off screen frame buffer properties
 #define FB_DIM 256
@@ -278,7 +278,7 @@ public:
 		attachmentDescriptions[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		attachmentDescriptions[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-		VkAttachmentReference colorReference = { 0,VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL };
+		VkAttachmentReference colorReference = { 0,VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 		VkAttachmentReference depthReference = { 1,VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
 		VkSubpassDescription subpassDescription = {};
@@ -514,50 +514,50 @@ public:
 	void setupDescriptorSet()
 	{
 		VkDescriptorSetAllocateInfo descriptorSetAllocInfo;
-		std::vector<VkWriteDescriptorSet> writeDescriotorSets;
+		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
 		// Full screen blur
 		// Vertical
 		descriptorSetAllocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.blur, 1);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.blurVert));
 
-		writeDescriotorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descrtiptor),  // Binding 0: Fragment shader uniform buffer
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[0].descriptor), //Binding 1: Fragment shader texture sampler
+		writeDescriptorSets = {
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptor),  // Binding 0: Fragment shader uniform buffer
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[0].descriptor), //Binding 1: Fragment shader texture sampler
 		};
 
-		vkUpdateDescriptorSets(device, writeDescriotorSets.size(), writeDescriotorSets.data(), 0, NULL);
+		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 		// Horizontal
 		descriptorSetAllocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.blur, 1);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.blurHorz));
-		writeDescriotorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descrtiptor), //Binding 0: Fragment shader uniform buffer
+		writeDescriptorSets = {
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptor), //Binding 0: Fragment shader uniform buffer
 			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[1].descriptor), // Binding 1: Fragment shader texture sampler
 		};
-		vkUpdateDescriptorSets(device, writeDescriotorSets.size(), writeDescriotorSets.data(), 0, NULL);
+		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 
 		//Scene rendering
 		descriptorSetAllocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.scene, 1);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.scene));
-		writeDescriotorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.scene,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.scene.descrtiptor) //Binding 0: Vertex shader uniform buffer
+		writeDescriptorSets = {
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.scene,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.scene.descriptor) //Binding 0: Vertex shader uniform buffer
 		};
-		vkUpdateDescriptorSets(device, writeDescriotorSets.size(), writeDescriotorSets.data(), 0, NULL);
+		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 
 		// Sky box
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.skyBox));
-		writeDescriotorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.skyBox.descrtiptor), // Binding 0: Vertex shader uniform buffer
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&cubeMap.descrtiptor),  //Binding 1: Fragment shader texture sampler
+		writeDescriptorSets = {
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.skyBox.descriptor), // Binding 0: Vertex shader uniform buffer
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&cubeMap.descriptor),  //Binding 1: Fragment shader texture sampler
 		};
-		vkUpdateDescriptorSets(device, writeDescriotorSets.size(), writeDescriotorSets.data(), 0, NULL);
+		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 	}//setupDescriptorSet
 
 	void preparePipelines()
 	{
 		VkPipelineColorBlendAttachmentState blendAttachmentState = vks::initializers::GenPipelineColorBlendAttachmentState(0xf, VK_FALSE);
 
-		VkPipelineInputAssemblyStateCreateInfo inputAssemblyStageCI = vks::initializers::GenPipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
+		VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCI = vks::initializers::GenPipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
 		VkPipelineRasterizationStateCreateInfo rasterizationStateCI = vks::initializers::GenPipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 		VkPipelineColorBlendStateCreateInfo  colorBlendStateCI = vks::initializers::GenPipelineColorBlendStateCreateInfo(1, &blendAttachmentState);
 		VkPipelineDepthStencilStateCreateInfo depthStencilStateCI = vks::initializers::GenPipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
@@ -569,7 +569,7 @@ public:
 		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
 		VkGraphicsPipelineCreateInfo pipelineCI = vks::initializers::GenPipelineCreateInfo(pipelineLayouts.blur, renderPass, 0);
-		pipelineCI.pInputAssemblyState = &inputAssemblyStageCI;
+		pipelineCI.pInputAssemblyState = &inputAssemblyStateCI;
 		pipelineCI.pRasterizationState = &rasterizationStateCI;
 		pipelineCI.pColorBlendState = &colorBlendStateCI;
 		pipelineCI.pMultisampleState = &multiSampleStateCI;
@@ -583,16 +583,16 @@ public:
 		shaderStages[0] = loadShader(getShaderPath() + "bloom/gaussblur.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 		shaderStages[1] = loadShader(getShaderPath() + "bloom/gaussblur.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 		// Empty vertex input state
-		VkPipelineVertexInputStateCreateInfo emptyInputStage = vks::initializers::GenPipelineVertexInputStateCreateInfo();
-		pipelineCI.pVertexInputState = &emptyInputStage;
+		VkPipelineVertexInputStateCreateInfo emptyInputState = vks::initializers::GenPipelineVertexInputStateCreateInfo();
+		pipelineCI.pVertexInputState = &emptyInputState;
 		pipelineCI.layout = pipelineLayouts.blur;
 
 		// Additive blending
 		blendAttachmentState.colorWriteMask = 0xF;
 		blendAttachmentState.blendEnable = VK_TRUE;
 		blendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
-		blendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		blendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		blendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+		blendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
 		blendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
 		blendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 		blendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
@@ -623,8 +623,8 @@ public:
 		blendAttachmentState.blendEnable = VK_FALSE;
 		depthStencilStateCI.depthWriteEnable = VK_TRUE;
 		rasterizationStateCI.cullMode = VK_CULL_MODE_BACK_BIT;
-		pipelineCI.renderPass = offscreenPass.renderPass;
-		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.glowPass));
+		pipelineCI.renderPass = renderPass;
+		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.phongPass));
 
 		// Color only pass (off-screen blur base)
 		shaderStages[0] = loadShader(getShaderPath() + "bloom/colorpass.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);

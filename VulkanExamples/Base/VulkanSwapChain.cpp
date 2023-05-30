@@ -377,6 +377,7 @@ void VulkanSwapChain::create(uint32_t * width, uint32_t * height, bool vsync)
 		colorAttachmentView.subresourceRange.levelCount = 1;
 		colorAttachmentView.subresourceRange.baseArrayLayer = 0;
 		colorAttachmentView.subresourceRange.layerCount = 1;
+		colorAttachmentView.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		colorAttachmentView.flags = 0;
 		colorAttachmentView.image = images[i];
 

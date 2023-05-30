@@ -1,5 +1,7 @@
 #include "VulkanExampleBase.h"
 
+std::vector<const char*> VulkanExampleBase::args;
+
 CommandLineParser::CommandLineParser()
 {
 	add("help", { "--help" }, 0, "Show help");
@@ -1055,8 +1057,8 @@ VkResult VulkanExampleBase::createInstance(bool enableValidation)
 
 		if (validationLayerPresent)
 		{
-			instanceCreateInfo.ppEnabledExtensionNames = &validtaionLayerName;
-			instanceCreateInfo.enabledExtensionCount = 1;
+			instanceCreateInfo.ppEnabledLayerNames = &validtaionLayerName;
+			instanceCreateInfo.enabledLayerCount = 1;
 		}
 		else
 		{
@@ -1187,7 +1189,7 @@ void VulkanExampleBase::setupRenderPass()
 
 	VkAttachmentReference depthReference = {};
 	depthReference.attachment = 1;
-	colorReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription subpassDescription = {};
 	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -1208,7 +1210,7 @@ void VulkanExampleBase::setupRenderPass()
 	dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 	dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-	dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT || VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 	dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
 	dependencies[1].srcSubpass = 0;

@@ -584,6 +584,10 @@ vkglTF::Node::~Node()
 	}
 }
 
+VkVertexInputBindingDescription vkglTF::Vertex::vertexInputBindingDescription;
+std::vector<VkVertexInputAttributeDescription> vkglTF::Vertex::vertexInputAttributeDescriptions;
+VkPipelineVertexInputStateCreateInfo vkglTF::Vertex::pipelineVertexInputStateCreateInfo;
+
 VkVertexInputBindingDescription vkglTF::Vertex::inputBindingDescription(uint32_t binding)
 {
 	return VkVertexInputBindingDescription({ binding, sizeof(Vertex),VK_VERTEX_INPUT_RATE_VERTEX});
@@ -711,7 +715,7 @@ void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 	VK_CHECK_RESULT(vkCreateImage(device->logicalDevice, &imageCreateInfo, nullptr, &emptyTexture.image));
 
 	vkGetImageMemoryRequirements(device->logicalDevice, emptyTexture.image, &memReqs);
-	memAllocInfo.memoryTypeIndex = memReqs.size;
+	memAllocInfo.allocationSize = memReqs.size;
 	memAllocInfo.memoryTypeIndex = device->GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	VK_CHECK_RESULT(vkAllocateMemory(device->logicalDevice, &memAllocInfo, nullptr, &emptyTexture.deviceMemory));
 	VK_CHECK_RESULT(vkBindImageMemory(device->logicalDevice, emptyTexture.image, emptyTexture.deviceMemory, 0));
@@ -815,7 +819,7 @@ void vkglTF::Model::loadNode(vkglTF::Node * parent, const tinygltf::Node & node,
 	}
 
 	glm::mat4 rotation = glm::mat4(1.0f);
-	if (node.translation.size() == 3)
+	if (node.translation.size() == 4)
 	{
 		glm::quat q = glm::make_quat(node.rotation.data());
 		pNewNode->rotation = glm::mat4(q);
@@ -899,7 +903,7 @@ void vkglTF::Model::loadNode(vkglTF::Node * parent, const tinygltf::Node & node,
 				{
 					const tinygltf::Accessor & uvAccessor = model.accessors[primitive.attributes.find("TEXCOORD_0")->second];
 					const tinygltf::BufferView &uvView = model.bufferViews[uvAccessor.bufferView];
-					bufferNormals = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
+					bufferTexCoords = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
 				}
 
 				if (primitive.attributes.find("COLOR_0")!=primitive.attributes.end())
@@ -924,7 +928,7 @@ void vkglTF::Model::loadNode(vkglTF::Node * parent, const tinygltf::Node & node,
 				{
 					const tinygltf::Accessor & jointAccessor = model.accessors[primitive.attributes.find("JOINTS_0")->second];
 					const tinygltf::BufferView &jointView = model.bufferViews[jointAccessor.bufferView];
-					bufferTangents = reinterpret_cast<const float*>(&(model.buffers[jointView.buffer].data[jointAccessor.byteOffset + jointView.byteOffset]));
+					bufferJoints = reinterpret_cast<const uint16_t*>(&(model.buffers[jointView.buffer].data[jointAccessor.byteOffset + jointView.byteOffset]));
 				}
 
 				if (primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end())
@@ -1021,7 +1025,7 @@ void vkglTF::Model::loadNode(vkglTF::Node * parent, const tinygltf::Node & node,
 			}
 
 			Primitive *pNewPrimitive = new Primitive(indexStart, indexCount, primitive.material > -1 ? materials[primitive.material] : materials.back());
-			pNewPrimitive->firstIndex = vertexStart;
+			pNewPrimitive->firstVertex = vertexStart;
 			pNewPrimitive->vertexCount = vertexCount;
 			pNewPrimitive->setDimensions(posMin, posMax);
 			pNewMesh->primitives.push_back(pNewPrimitive);
@@ -1798,6 +1802,7 @@ void vkglTF::Model::prepareNodeDescriptor(vkglTF::Node * node, VkDescriptorSetLa
 
 		VkWriteDescriptorSet writeDescriptorSet{};
 		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.dstSet = node->mesh->uniformBuffer.descriptorSet;
 		writeDescriptorSet.dstBinding = 0;

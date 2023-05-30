@@ -32,7 +32,7 @@ namespace vks
 		uint32_t width, height;
 		uint32_t mipLevels;
 		uint32_t layerCount;
-		VkDescriptorImageInfo descrtiptor;
+		VkDescriptorImageInfo descriptor;
 		VkSampler sampler;
 
 		void updateDescriptor();

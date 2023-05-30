@@ -7,9 +7,9 @@ namespace vks
 {
 	void Texture::updateDescriptor()
 	{
-		descrtiptor.sampler = sampler;
-		descrtiptor.imageView = view;
-		descrtiptor.imageLayout = imageLayout;
+		descriptor.sampler = sampler;
+		descriptor.imageView = view;
+		descriptor.imageLayout = imageLayout;
 	}
 
 	void Texture::destroy()
