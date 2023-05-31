@@ -452,6 +452,7 @@ void vkglTF::Material::createDescriptorSet(VkDescriptorPool descriptorPool, VkDe
 	VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
 	descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	descriptorSetAllocInfo.descriptorPool = descriptorPool;
+	descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
 	descriptorSetAllocInfo.descriptorSetCount = 1;
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(device->logicalDevice, &descriptorSetAllocInfo, &descriptorSet));
 
@@ -753,6 +754,7 @@ void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 	viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	viewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
 	viewCreateInfo.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
+	viewCreateInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 	viewCreateInfo.subresourceRange.levelCount = 1;
 	viewCreateInfo.image = emptyTexture.image;
 	VK_CHECK_RESULT(vkCreateImageView(device->logicalDevice, &viewCreateInfo, nullptr, &emptyTexture.view));
@@ -935,7 +937,7 @@ void vkglTF::Model::loadNode(vkglTF::Node * parent, const tinygltf::Node & node,
 				{
 					const tinygltf::Accessor & uvAccessor = model.accessors[primitive.attributes.find("WEIGHTS_0")->second];
 					const tinygltf::BufferView &uvView = model.bufferViews[uvAccessor.bufferView];
-					bufferTangents = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
+					bufferWeights = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
 				}
 
 				hasSkin = (bufferJoints && bufferWeights);

@@ -259,7 +259,7 @@ namespace vks
 		inline VkPipelineLayoutCreateInfo GenPipelineLayoutCreateInfo(const VkDescriptorSetLayout* pSetLayouts, uint32_t setLayoutCount = 1)
 		{
 			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
-			pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
 			pipelineLayoutCreateInfo.pSetLayouts = pSetLayouts;
 			return pipelineLayoutCreateInfo;
@@ -368,7 +368,7 @@ namespace vks
 		inline VkPipelineRasterizationStateCreateInfo GenPipelineRasterizationStateCreateInfo(VkPolygonMode pologonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipelineInputAssemblyStateCreateFlags flags = 0)
 		{
 			VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
-			pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+			pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 			pipelineRasterizationStateCreateInfo.polygonMode = pologonMode;
 			pipelineRasterizationStateCreateInfo.cullMode = cullMode;
 			pipelineRasterizationStateCreateInfo.frontFace = frontFace;
