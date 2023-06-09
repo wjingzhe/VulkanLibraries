@@ -1323,13 +1323,13 @@ void VulkanExampleBase::renderLoop()
 				quitMessageReceived = true;
 				break;
 			}
-
-			if (prepared && !IsIconic(window))
+		}//while PeekMessage
+		
+		if (prepared && !IsIconic(window))
 			{
 				nextFrame();//Âß¼­Æô¶¯µã
 			}
-		}
-	}
+	}//while quitMessageReceived
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 	while (1)
 	{
