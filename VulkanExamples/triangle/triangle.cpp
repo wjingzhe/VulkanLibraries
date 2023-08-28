@@ -710,7 +710,7 @@ public:
 		// Setup attachment references
 		VkAttachmentReference colorReference = {};
 		colorReference.attachment = 0; //Attachment 0 is color
-		colorReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; // Attachment used as depth/stencil used during the subpass
+		colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // Attachment used as depth/stencil used during the subpass
 
 		VkAttachmentReference depthReference = {};
 		depthReference.attachment = 1; // Attachment 1 is color
@@ -959,7 +959,7 @@ public:
 		assert(shaderStages[0].module != VK_NULL_HANDLE);
 
 		//Fragment shader
-		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		// Set pipeline stage for this shader
 		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		// load binary SPIR-V shader
@@ -998,7 +998,7 @@ public:
 
 		// Vertex shader uniform  buffer block
 		VkBufferCreateInfo bufferInfo = {};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = sizeof(uboVS);
 		// This buffer will be used as a uniform buffer
 		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
@@ -1025,7 +1025,7 @@ public:
 		VK_CHECK_RESULT(vkBindBufferMemory(device, uniformBufferVS.buffer, uniformBufferVS.memory, 0));
 
 		// Store information in the unform's descriptor that is used by the descriptor set
-		uniformBufferVS.buffer = uniformBufferVS.buffer;
+		uniformBufferVS.descriptor.buffer = uniformBufferVS.buffer;
 		uniformBufferVS.descriptor.offset = 0;
 		uniformBufferVS.descriptor.range = sizeof(uboVS);
 

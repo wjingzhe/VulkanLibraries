@@ -160,7 +160,7 @@ namespace vkglTF
 	{
 		std::string name;
 		Node* skeletonRoot = nullptr;
-		std::vector<glm::mat4> inverseBindmatrices;
+		std::vector<glm::mat4> inverseBindMatrices;
 		std::vector<Node*> joints;
 	};
 

@@ -467,7 +467,7 @@ public:
 	{
 		const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
 		models.ufo.loadFromFile(getAssetPath() + "models/retroufo.gltf", vulkanDevice, queue, glTFLoadingFlags);
-		models.ufoGlow.loadFromFile(getAssetPath() + "models/retroufo_glow.gltf", vulkanDevice, queue, glTFLoadingFlags);
+		//models.ufoGlow.loadFromFile(getAssetPath() + "models/retroufo_glow.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		models.skyBox.loadFromFile(getAssetPath() + "models/cube.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		cubeMap.loadFromFile(getAssetPath() + "textures/cubemap_space.ktx", VK_FORMAT_R8G8B8A8_UNORM, vulkanDevice, queue);
 	}
@@ -674,11 +674,15 @@ public:
 		ubos.scene.projectction = camera.matrices.perspective;
 		ubos.scene.view = camera.matrices.view;
 
-		auto tempVector3 = glm::vec3(sin(glm::radians(timer*360.0f))*0.25f, -1.0f, cos(glm::radians(timer*360.0f)*0.25f));
+		ubos.scene.model = glm::translate(glm::mat4(1.0f), glm::vec3(sin(glm::radians(timer * 360.0f)) * 0.25f, -1.0f, cos(glm::radians(timer * 360.0f)) * 0.25f));
+		ubos.scene.model = glm::rotate(ubos.scene.model, -sinf(glm::radians(timer * 360.0f)) * 0.15f, glm::vec3(1.0f, 0.0f, 0.0f));
+		ubos.scene.model = glm::rotate(ubos.scene.model, glm::radians(timer * 360.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		ubos.scene.model = glm::translate(glm::mat4(1.0f), tempVector3);
-		ubos.scene.model = glm::rotate(ubos.scene.model, -sinf(glm::radians(timer*360.0f))*0.15f, glm::vec3(1.0f, 0.0f, 0.0f));
-		ubos.scene.model = glm::rotate(ubos.scene.model, glm::radians(timer*360.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//auto tempVector3 = glm::vec3(sin(glm::radians(timer*360.0f))*0.25f, -1.0f, cos(glm::radians(timer*360.0f))*0.25f);
+
+		//ubos.scene.model = glm::translate(glm::mat4(1.0f), tempVector3);
+		//ubos.scene.model = glm::rotate(ubos.scene.model, -sinf(glm::radians(timer*360.0f))*0.15f, glm::vec3(1.0f, 0.0f, 0.0f));
+		//ubos.scene.model = glm::rotate(ubos.scene.model, glm::radians(timer*360.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		memcpy(uniformBuffers.scene.mappedData, &ubos.scene, sizeof(ubos.scene));
 

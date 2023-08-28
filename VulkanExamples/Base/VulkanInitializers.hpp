@@ -513,6 +513,7 @@ namespace vks
 			VkSpecializationInfo specializationInfo{};
 			specializationInfo.mapEntryCount = mapEntryCount;
 			specializationInfo.pMapEntries = mapEntries;
+			specializationInfo.dataSize = dataSize;
 			specializationInfo.pData = data;
 			return specializationInfo;
 		}
