@@ -172,7 +172,7 @@ void VulkanExampleBase::windowResize()
 	// Command buffers need to be created as they may store references to the recreated frame buffer
 	destroyCommandBuffers();
 	createCommandBuffers();
-	buildCommandBuffers();
+	buildCommandBuffersAndRenderPrmitives();
 
 	vkDeviceWaitIdle(device);
 
@@ -314,7 +314,7 @@ void VulkanExampleBase::updateOverlay()
 	ImGui::Render();
 
 	if (uiOverlay.update() || uiOverlay.updated) {
-		buildCommandBuffers();
+		buildCommandBuffersAndRenderPrmitives();
 		uiOverlay.updated = false;
 	}
 
@@ -351,7 +351,7 @@ void VulkanExampleBase::createSynchronizationPrimitives()
 	}
 }
 
-void VulkanExampleBase::initSwapChain()
+void VulkanExampleBase::initSwapChainSurface()
 {
 #ifdef _WIN32
 	swapChain.initSurface(windowInstance, window);
@@ -531,7 +531,7 @@ VulkanExampleBase::~VulkanExampleBase()
 	//}
 }
 
-bool VulkanExampleBase::initVulkan()
+bool VulkanExampleBase::initVulkanSetting()
 {
 	VkResult err;
 
@@ -1085,7 +1085,7 @@ void VulkanExampleBase::windowResized()
 {
 }
 
-void VulkanExampleBase::buildCommandBuffers()
+void VulkanExampleBase::buildCommandBuffersAndRenderPrmitives()
 {
 }
 
@@ -1238,14 +1238,14 @@ void VulkanExampleBase::getEnabledFeatures()
 {
 }
 
-void VulkanExampleBase::prepare()
+void VulkanExampleBase::prepareForRendering()
 {
 	if (vulkanDevice->enableDebugMarkers)
 	{
 		vks::debugmarker::setup(device);
 	}
 
-	initSwapChain();
+	initSwapChainSurface();
 	createCommandPool();
 	setupSwapChain();
 	createCommandBuffers();

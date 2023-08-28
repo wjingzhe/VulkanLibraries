@@ -269,6 +269,7 @@ void VulkanSwapChain::create(uint32_t * width, uint32_t * height, bool vsync)
 		}//for
 	}
 
+	//设置缓冲区数量
 	uint32_t desiredNumberOfSwapchainImages = surfaceCaps.minImageCount + 1;
 	if( (surfaceCaps.maxImageCount>0) && (desiredNumberOfSwapchainImages>surfaceCaps.maxImageCount))
 	{

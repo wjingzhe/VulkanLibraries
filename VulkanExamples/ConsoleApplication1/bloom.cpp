@@ -15,7 +15,7 @@
 class VulkanExample : public VulkanExampleBase
 {
 public:
-	bool bloom = true;
+	bool bloom = false;
 
 	vks::TextureCubeMap cubeMap;
 
@@ -339,7 +339,7 @@ public:
 		prepareOffscreenFramebuffer(&offscreenPass.frameBuffers[1], FB_COLOR_FORMAT, fbDepthFormat);
 	}
 
-	void buildCommandBuffers()
+	void buildCommandBuffersAndRenderPrmitives()
 	{
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::GenCommandBufferBeginInfo();
 
@@ -355,6 +355,7 @@ public:
 		{
 			VK_CHECK_RESULT(vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo));
 
+			// 先绘制要bloom的对象到独立RT，并执行竖直方向的模糊
 			if (bloom)
 			{
 				clearValues[0].color = { {0.0f,0.0f,0.0f,1.0f} };
@@ -434,16 +435,17 @@ public:
 
 				VkDeviceSize offsets[1] = { 0 };
 
-				// SkyBox
-				vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.scene, 0, 1, &descriptorSets.skyBox, 0, NULL);
-				vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.skyBox);
-				models.skyBox.draw(drawCmdBuffers[i]);
+				//// SkyBox
+				//vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.scene, 0, 1, &descriptorSets.skyBox, 0, NULL);
+				//vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.skyBox);
+				//models.skyBox.draw(drawCmdBuffers[i]);
 
 				// 3D scene
 				vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.scene, 0, 1, &descriptorSets.scene, 0, NULL);
 				vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.phongPass);
 				models.ufo.draw(drawCmdBuffers[i]);
 
+				//将水平方向的bloom结果直接以blend形式绘制到主RT上
 				if (bloom)
 				{
 					vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.blur, 0, 1, &descriptorSets.blurHorz, 0, NULL);
@@ -459,7 +461,7 @@ public:
 			VK_CHECK_RESULT(vkEndCommandBuffer(drawCmdBuffers[i]));
 
 		}// for drawCmdBuffers[i]
-	}//buildCommandBuffers
+	}//buildCommandBuffersAndRenderPrmitives
 
 	void loadAssets()
 	{
@@ -467,7 +469,7 @@ public:
 		models.ufo.loadFromFile(getAssetPath() + "models/retroufo.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		models.ufoGlow.loadFromFile(getAssetPath() + "models/retroufo_glow.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		models.skyBox.loadFromFile(getAssetPath() + "models/cube.gltf", vulkanDevice, queue, glTFLoadingFlags);
-		cubeMap.loadFromFile(getAssetPath() + "textures/cubemap_space.ktx", VK_FORMAT_R8G8B8A8_SNORM, vulkanDevice, queue);
+		cubeMap.loadFromFile(getAssetPath() + "textures/cubemap_space.ktx", VK_FORMAT_R8G8B8A8_UNORM, vulkanDevice, queue);
 	}
 
 	void setupDescriptorPool()
@@ -702,9 +704,9 @@ public:
 		VulkanExampleBase::submitFrame();
 	}
 
-	void prepare()
+	void prepareForRendering()
 	{
-		VulkanExampleBase::prepare();
+		VulkanExampleBase::prepareForRendering();
 		loadAssets();
 		prepareUniformBuffers();
 		prepareOffscreen();
@@ -712,7 +714,7 @@ public:
 		preparePipelines();
 		setupDescriptorPool();
 		setupDescriptorSet();
-		buildCommandBuffers();
+		buildCommandBuffersAndRenderPrmitives();
 		prepared = true;
 	}
 
@@ -737,7 +739,7 @@ public:
 		{
 			if (overlay->checkBox("Bloom",&bloom))
 			{
-				buildCommandBuffers();
+				buildCommandBuffersAndRenderPrmitives();
 			}
 
 			if (overlay->inputFloat("Scale",&ubos.blurParams.blurScale,0.1f,2))

@@ -110,7 +110,7 @@ private:
 	void createPipelineCache();
 	void createCommandPool();
 	void createSynchronizationPrimitives();
-	void initSwapChain();
+	void initSwapChainSurface();
 	void setupSwapChain();
 	void createCommandBuffers();
 	void destroyCommandBuffers();
@@ -298,7 +298,7 @@ public:
 
 	VulkanExampleBase(bool enableValidation = false);
 	virtual ~VulkanExampleBase();
-	bool initVulkan();
+	bool initVulkanSetting();
 
 #ifdef _WIN32
 	void setupConsole(std::string title);
@@ -386,7 +386,7 @@ public:
 
 	virtual void windowResized();
 
-	virtual void buildCommandBuffers();
+	virtual void buildCommandBuffersAndRenderPrmitives();
 
 	virtual void setupDepthStencil();
 
@@ -396,7 +396,7 @@ public:
 
 	virtual void getEnabledFeatures();
 
-	virtual void prepare();
+	virtual void prepareForRendering();
 
 	VkPipelineShaderStageCreateInfo loadShader(std::string fileName, VkShaderStageFlagBits stage);
 
@@ -433,9 +433,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE,LPSTR,int) \
 		VulkanExampleBase::args.push_back(__argv[i]);\
 	};\
 vulkanExample = new VulkanExample();\
-vulkanExample->initVulkan();\
+vulkanExample->initVulkanSetting();\
 vulkanExample->setupWindow(hInstance, WndProc); \
-vulkanExample->prepare();\
+vulkanExample->prepareForRendering();\
 vulkanExample->renderLoop();\
 delete(vulkanExample);\
 return 0;\
@@ -467,8 +467,8 @@ int main(const int argc, const char *argv[])													    \
 {																									\
 	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
 	vulkanExample = new VulkanExample();															\
-	vulkanExample->initVulkan();																	\
-	vulkanExample->prepare();																		\
+	vulkanExample->initVulkanSetting();																	\
+	vulkanExample->prepareForRendering();																		\
 	vulkanExample->renderLoop();																	\
 	delete(vulkanExample);																			\
 	return 0;																						\
@@ -487,9 +487,9 @@ int main(const int argc, const char *argv[])													    \
 {																									\
 	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
 	vulkanExample = new VulkanExample();															\
-	vulkanExample->initVulkan();																	\
+	vulkanExample->initVulkanSetting();																	\
 	vulkanExample->setupWindow();					 												\
-	vulkanExample->prepare();																		\
+	vulkanExample->prepareForRendering();																		\
 	vulkanExample->renderLoop();																	\
 	delete(vulkanExample);																			\
 	return 0;																						\
@@ -501,9 +501,9 @@ int main(const int argc, const char *argv[])													    \
 {																									\
 	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
 	vulkanExample = new VulkanExample();															\
-	vulkanExample->initVulkan();																	\
+	vulkanExample->initVulkanSetting();																	\
 	vulkanExample->setupWindow();					 												\
-	vulkanExample->prepare();																		\
+	vulkanExample->prepareForRendering();																		\
 	vulkanExample->renderLoop();																	\
 	delete(vulkanExample);																			\
 	return 0;																						\
@@ -522,9 +522,9 @@ int main(const int argc, const char *argv[])													    \
 {																									\
 	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };  				\
 	vulkanExample = new VulkanExample();															\
-	vulkanExample->initVulkan();																	\
+	vulkanExample->initVulkanSetting();																	\
 	vulkanExample->setupWindow();					 												\
-	vulkanExample->prepare();																		\
+	vulkanExample->prepareForRendering();																		\
 	vulkanExample->renderLoop();																	\
 	delete(vulkanExample);																			\
 	return 0;																						\
@@ -539,9 +539,9 @@ int main(const int argc, const char *argv[])													    \
 		{																								\
 			for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); };				\
 			vulkanExample = new VulkanExample();														\
-			vulkanExample->initVulkan();																\
+			vulkanExample->initVulkanSetting();																\
 			vulkanExample->setupWindow(nullptr);														\
-			vulkanExample->prepare();																	\
+			vulkanExample->prepareForRendering();																	\
 			vulkanExample->renderLoop();																\
 			delete(vulkanExample);																		\
 		}																								\
