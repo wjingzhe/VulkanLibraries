@@ -514,7 +514,7 @@ void vkglTF::Primitive::setDimensions(glm::vec3 min, glm::vec3 max)
 	dimensions.min = min;
 	dimensions.max = max;
 	dimensions.size = max - min;
-	dimensions.center = (max + min) / 2.0f;
+	dimensions.center = (min + max) / 2.0f;
 	dimensions.radius = glm::distance(min, max) / 2.0f;
 }
 
@@ -540,9 +540,11 @@ vkglTF::Mesh::~Mesh()
 	}
 }
 
-glm::mat4 vkglTF::Node::localMatrix()
-{
-	return glm::translate(glm::mat4(1.0f),translation)*glm::mat4(rotation)*glm::scale(glm::mat4(1.0f),scale)*matrix;
+/*
+	glTF node
+*/
+glm::mat4 vkglTF::Node::localMatrix() {
+	return glm::translate(glm::mat4(1.0f), translation) * glm::mat4(rotation) * glm::scale(glm::mat4(1.0f), scale) * matrix;
 }
 
 glm::mat4 vkglTF::Node::getMatrix()
@@ -847,7 +849,7 @@ void vkglTF::Model::loadNode(vkglTF::Node * parent, const tinygltf::Node & node,
 	}
 
 	glm::mat4 rotation = glm::mat4(1.0f);
-	if (node.translation.size() == 4)
+	if (node.rotation.size() == 4)
 	{
 		glm::quat q = glm::make_quat(node.rotation.data());
 		pNewNode->rotation = glm::mat4(q);
@@ -1161,7 +1163,7 @@ void vkglTF::Model::loadMaterials(tinygltf::Model & gltfModel)
 		}
 		if (mat.additionalValues.find("occlusionTexture") != mat.additionalValues.end())
 		{
-			material.emissiveTexture = getTexture(gltfModel.textures[mat.additionalValues["occlusionTexture"].TextureIndex()].source);
+			material.occlusionTexture = getTexture(gltfModel.textures[mat.additionalValues["occlusionTexture"].TextureIndex()].source);
 		}
 		if (mat.additionalValues.find("alphaMode")!=mat.additionalValues.end())
 		{
@@ -1401,7 +1403,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice * devic
 	}//if_else fileLoaded
 
 	// Pre-Calculations for requested features
-	if ((fileLoadingFlags & FileLoadingFlags::PreTransformVertices) || (fileLoadingFlags & FileLoadingFlags::PreMultiplyVertexColors) || (fileLoadingFlags&FileLoadingFlags::FlipY))
+	if ((fileLoadingFlags & FileLoadingFlags::PreTransformVertices) || (fileLoadingFlags & FileLoadingFlags::PreMultiplyVertexColors) || (fileLoadingFlags & FileLoadingFlags::FlipY))
 	{
 		const bool preTransform = fileLoadingFlags & FileLoadingFlags::PreTransformVertices;
 		const bool preMultiplyColor = fileLoadingFlags & FileLoadingFlags::PreMultiplyVertexColors;

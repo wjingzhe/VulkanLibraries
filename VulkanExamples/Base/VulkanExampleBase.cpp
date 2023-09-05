@@ -619,7 +619,7 @@ bool VulkanExampleBase::initVulkanSetting()
 
 	// Store properties (including limits), features and memory properties of the physical device(so that examples can check against them)
 	vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
-	vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeartures);
+	vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
 	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
 
 	// Derived examples can override this to set actual features (based on above readings) to enable for logical device creation

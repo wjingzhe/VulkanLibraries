@@ -130,7 +130,7 @@ protected:
 	// Stores physical device properties (for e.g. checking device limits)
 	VkPhysicalDeviceProperties deviceProperties;
 	// Stores all features available on the selected physical device (for e.g checking if a feature is available)
-	VkPhysicalDeviceFeatures deviceFeartures;
+	VkPhysicalDeviceFeatures deviceFeatures;
 	//Stores all available memory(type) properties for the physical device
 	VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
 	// Set of physical device features to be enabled for this example (must be set in the derived constructor)
