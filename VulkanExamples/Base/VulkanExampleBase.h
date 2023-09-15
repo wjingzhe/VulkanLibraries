@@ -134,7 +134,7 @@ protected:
 	//Stores all available memory(type) properties for the physical device
 	VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
 	// Set of physical device features to be enabled for this example (must be set in the derived constructor)
-	VkPhysicalDeviceFeatures enabledFeatures{};
+	VkPhysicalDeviceFeatures curEnabledDeviceFeatures{};
 	std::vector<const char*> enableDeviceExtensions;
 	std::vector<const char*> enableInstanceExtensions;
 

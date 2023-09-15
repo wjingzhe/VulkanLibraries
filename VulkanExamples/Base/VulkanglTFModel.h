@@ -369,7 +369,7 @@ namespace vkglTF
 
 		Node* nodeFromIndex(int32_t index);
 		
-		void prepareNodeDescriptor(vkglTF::Node* node, VkDescriptorSetLayout descritorSetLayout);
+		void prepareNodeDescriptor(vkglTF::Node* node, VkDescriptorSetLayout descriptorSetLayout);
 
 	protected:
 	private:

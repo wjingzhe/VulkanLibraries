@@ -24,9 +24,9 @@ namespace vks
 
 	void Buffer::setupDescriptor(VkDeviceSize size, VkDeviceSize offset)
 	{
-		descriptor.offset = offset;
-		descriptor.buffer = buffer;
-		descriptor.range = size;
+		descriptorBufferInfo.offset = offset;
+		descriptorBufferInfo.buffer = buffer;
+		descriptorBufferInfo.range = size;
 	}
 
 	void Buffer::copyFromData(void * data, VkDeviceSize size)

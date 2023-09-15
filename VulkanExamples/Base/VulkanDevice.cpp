@@ -121,7 +121,7 @@ namespace vks
 		throw std::runtime_error("Could  not find a matching queue family index");
 	}
 
-	VkResult VulkanDevice::CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, std::vector<const char*> enabledExtensions, void * pNextChain, bool useSwapChain, VkQueueFlags requestedQueueTypes)
+	VkResult VulkanDevice::CreateLogicalDevice(VkPhysicalDeviceFeatures enabledDeviceFeatures, std::vector<const char*> enabledExtensions, void * pNextChain, bool useSwapChain, VkQueueFlags requestedQueueTypes)
 	{
 		// Desired queues need to be requested upon logical device creation
 		// Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
@@ -200,14 +200,14 @@ namespace vks
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
-		deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
+		deviceCreateInfo.pEnabledFeatures = &enabledDeviceFeatures;
 
 		//if a pNext(Chain) has been passed, we need to add it to the device creation info
 		VkPhysicalDeviceFeatures2 physicalDeviceFeatures2{};
 		if (pNextChain)
 		{
 			physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-			physicalDeviceFeatures2.features = enabledFeatures;
+			physicalDeviceFeatures2.features = enabledDeviceFeatures;
 			physicalDeviceFeatures2.pNext = pNextChain;
 			deviceCreateInfo.pEnabledFeatures = nullptr;
 			deviceCreateInfo.pNext = &physicalDeviceFeatures2;
@@ -237,7 +237,7 @@ namespace vks
 
 		}
 
-		this->m_enabledFeatures = enabledFeatures;
+		this->m_enabledDeviceFeatures = enabledDeviceFeatures;
 
 		VkResult result = vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice);
 		if (result!=VK_SUCCESS)

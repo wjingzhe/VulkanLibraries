@@ -1794,7 +1794,7 @@ vkglTF::Node * vkglTF::Model::findNode(Node * parent, uint32_t index)
 
 	for (auto& child:parent->children)
 	{
-		nodeFound == findNode(child, index);
+		nodeFound = findNode(child, index);
 		if (nodeFound)
 		{
 			break;

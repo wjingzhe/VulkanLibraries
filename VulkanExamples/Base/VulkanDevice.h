@@ -15,7 +15,7 @@ namespace vks
 		VkDevice logicalDevice;
 		VkPhysicalDeviceProperties properties;
 		VkPhysicalDeviceFeatures features;
-		VkPhysicalDeviceFeatures m_enabledFeatures;
+		VkPhysicalDeviceFeatures m_enabledDeviceFeatures;
 		VkPhysicalDeviceMemoryProperties memoryProperties;
 		std::vector<VkQueueFamilyProperties> queueFamilyProperties;
 		std::vector<std::string> supportedExtensions;
@@ -42,7 +42,7 @@ namespace vks
 
 		uint32_t GetQueueFamilyIndex(VkQueueFlagBits queueFlags)const;
 
-		VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, std::vector<const char*>enabledExtensions,
+		VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledDeviceFeatures, std::vector<const char*>enabledExtensions,
 			void *pNextChain, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
 
 		VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, VkBuffer *buffer, VkDeviceMemory *memory, void * data = nullptr);

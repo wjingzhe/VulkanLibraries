@@ -526,7 +526,7 @@ public:
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.blurVert));
 
 		writeDescriptorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptor),  // Binding 0: Fragment shader uniform buffer
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptorBufferInfo),  // Binding 0: Fragment shader uniform buffer
 			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[0].descriptor), //Binding 1: Fragment shader texture sampler
 		};
 
@@ -535,7 +535,7 @@ public:
 		descriptorSetAllocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.blur, 1);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.blurHorz));
 		writeDescriptorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptor), //Binding 0: Fragment shader uniform buffer
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptorBufferInfo), //Binding 0: Fragment shader uniform buffer
 			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[1].descriptor), // Binding 1: Fragment shader texture sampler
 		};
 		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
@@ -544,14 +544,14 @@ public:
 		descriptorSetAllocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.scene, 1);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.scene));
 		writeDescriptorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.scene,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.scene.descriptor) //Binding 0: Vertex shader uniform buffer
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.scene,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.scene.descriptorBufferInfo) //Binding 0: Vertex shader uniform buffer
 		};
 		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 
 		// Sky box
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.skyBox));
 		writeDescriptorSets = {
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.skyBox.descriptor), // Binding 0: Vertex shader uniform buffer
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.skyBox.descriptorBufferInfo), // Binding 0: Vertex shader uniform buffer
 			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&cubeMap.descriptor),  //Binding 1: Fragment shader texture sampler
 		};
 		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);

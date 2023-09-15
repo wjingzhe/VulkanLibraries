@@ -72,12 +72,12 @@ public:
 		// Fill mode non solid is required for wireframe display
 		if (deviceFeatures.fillModeNonSolid)
 		{
-			enabledFeatures.fillModeNonSolid = VK_TRUE;
+			curEnabledDeviceFeatures.fillModeNonSolid = VK_TRUE;
 
 			//Wide lines must be present for line width > 1.0f
 			if (deviceFeatures.wideLines)
 			{
-				enabledFeatures.wideLines = VK_TRUE;
+				curEnabledDeviceFeatures.wideLines = VK_TRUE;
 			}
 		}
 	}
@@ -192,7 +192,7 @@ public:
 		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet));
 
-		std::vector<VkWriteDescriptorSet> writeDescriptorSets = { vks::initializers::GenWriteDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffer.descriptor) };
+		std::vector<VkWriteDescriptorSet> writeDescriptorSets = { vks::initializers::GenWriteDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffer.descriptorBufferInfo) };
 
 		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 	}

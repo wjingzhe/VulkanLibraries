@@ -82,6 +82,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)external/glm;$(SolutionDir)external/gli;%(AdditionalIncludeDirectories);$(SolutionDir)external/imgui;$(SolutionDir)external/ktx/include;$(SolutionDir)external/ktx/other_include;$(SolutionDir)Base;$(SolutionDir)external/tinygltf</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="C:/WorkSpace/VulkanLibraries/VulkanExamples/data/";CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
