@@ -52,7 +52,7 @@ public:
 	{
 		VkDeviceMemory memory;
 		VkBuffer buffer;
-		VkDescriptorBufferInfo descriptor;
+		VkDescriptorBufferInfo descriptorBufferInfo;
 	} uniformBufferVS;
 
 	// For simplicity we use the same uniform block layout as in the shader:
@@ -591,7 +591,7 @@ public:
 		writeDescriptorSet.dstSet = descriptorSet;
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		writeDescriptorSet.pBufferInfo = &uniformBufferVS.descriptor;
+		writeDescriptorSet.pBufferInfo = &uniformBufferVS.descriptorBufferInfo;
 		// Binds this uniform buffer to binding point 0
 		writeDescriptorSet.dstBinding = 0;
 
@@ -1025,9 +1025,9 @@ public:
 		VK_CHECK_RESULT(vkBindBufferMemory(device, uniformBufferVS.buffer, uniformBufferVS.memory, 0));
 
 		// Store information in the unform's descriptor that is used by the descriptor set
-		uniformBufferVS.descriptor.buffer = uniformBufferVS.buffer;
-		uniformBufferVS.descriptor.offset = 0;
-		uniformBufferVS.descriptor.range = sizeof(uboVS);
+		uniformBufferVS.descriptorBufferInfo.buffer = uniformBufferVS.buffer;
+		uniformBufferVS.descriptorBufferInfo.offset = 0;
+		uniformBufferVS.descriptorBufferInfo.range = sizeof(uboVS);
 
 		updateUniformBuffers();
 	}

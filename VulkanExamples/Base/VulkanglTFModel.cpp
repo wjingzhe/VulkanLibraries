@@ -49,9 +49,9 @@ glTF texture loading class
 */
 void vkglTF::Texture::updateDescriptor()
 {
-	descriptor.sampler = sampler;
-	descriptor.imageView = view;
-	descriptor.imageLayout = imageLayout;
+	descriptorImageInfo.sampler = sampler;
+	descriptorImageInfo.imageView = view;
+	descriptorImageInfo.imageLayout = imageLayout;
 }
 
 void vkglTF::Texture::destroy()
@@ -458,9 +458,9 @@ void vkglTF::Texture::fromglTfImage(tinygltf::Image& gltfImage, std::string path
 	viewInfo.subresourceRange.levelCount = mipLevels;
 	VK_CHECK_RESULT(vkCreateImageView(device->logicalDevice, &viewInfo, nullptr, &view));
 
-	descriptor.sampler = sampler;
-	descriptor.imageView = view;
-	descriptor.imageLayout = imageLayout;
+	descriptorImageInfo.sampler = sampler;
+	descriptorImageInfo.imageView = view;
+	descriptorImageInfo.imageLayout = imageLayout;
 }
 
 /*
@@ -480,28 +480,28 @@ void vkglTF::Material::createDescriptorSet(VkDescriptorPool descriptorPool, VkDe
 
 	if (descriptorBindingFlags&DescriptorBindingFlags::ImageBaseColor)
 	{
-		imageDescriptors.push_back(baseColorTexture->descriptor);
+		imageDescriptors.push_back(baseColorTexture->descriptorImageInfo);
 		VkWriteDescriptorSet writeDescriptorSet{};
 		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.dstSet = descriptorSet;
 		writeDescriptorSet.dstBinding = static_cast<uint32_t>(writeDescriptorSets.size());//index
-		writeDescriptorSet.pImageInfo = &baseColorTexture->descriptor;
+		writeDescriptorSet.pImageInfo = &baseColorTexture->descriptorImageInfo;
 
 		writeDescriptorSets.push_back(writeDescriptorSet);
 	}
 
 	if (normalTexture && (descriptorBindingFlags & DescriptorBindingFlags::ImageNormalMap ))
 	{
-		imageDescriptors.push_back(normalTexture->descriptor);
+		imageDescriptors.push_back(normalTexture->descriptorImageInfo);
 		VkWriteDescriptorSet writeDescriptorSet{};
 		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.dstSet = descriptorSet;
 		writeDescriptorSet.dstBinding = static_cast<uint32_t>(writeDescriptorSets.size());//index
-		writeDescriptorSet.pImageInfo = &normalTexture->descriptor;
+		writeDescriptorSet.pImageInfo = &normalTexture->descriptorImageInfo;
 
 		writeDescriptorSets.push_back(writeDescriptorSet);
 	}
@@ -527,7 +527,7 @@ vkglTF::Mesh::Mesh(vks::VulkanDevice * device, glm::mat4 matrix)
 		sizeof(this->uniformBlock), &this->uniformBuffer.buffer, &this->uniformBuffer.memory, &this->uniformBlock));
 
 	VK_CHECK_RESULT(vkMapMemory(device->logicalDevice, uniformBuffer.memory, 0, sizeof(uniformBlock), 0, &uniformBuffer.mapped));
-	uniformBuffer.descriptor = { uniformBuffer.buffer,0,sizeof(uniformBlock) };
+	uniformBuffer.descriptorBufferInfo = { uniformBuffer.buffer,0,sizeof(uniformBlock) };
 }
 
 vkglTF::Mesh::~Mesh()
@@ -784,9 +784,9 @@ void vkglTF::Model::createEmptyTexture(VkQueue transferQueue)
 	viewCreateInfo.image = emptyTexture.image;
 	VK_CHECK_RESULT(vkCreateImageView(device->logicalDevice, &viewCreateInfo, nullptr, &emptyTexture.view));
 
-	emptyTexture.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	emptyTexture.descriptor.imageView = emptyTexture.view;
-	emptyTexture.descriptor.sampler = emptyTexture.sampler;
+	emptyTexture.descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	emptyTexture.descriptorImageInfo.imageView = emptyTexture.view;
+	emptyTexture.descriptorImageInfo.sampler = emptyTexture.sampler;
 }
 
 /*
@@ -1835,7 +1835,7 @@ void vkglTF::Model::prepareNodeDescriptor(vkglTF::Node * node, VkDescriptorSetLa
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.dstSet = node->mesh->uniformBuffer.descriptorSet;
 		writeDescriptorSet.dstBinding = 0;
-		writeDescriptorSet.pBufferInfo = &node->mesh->uniformBuffer.descriptor;
+		writeDescriptorSet.pBufferInfo = &node->mesh->uniformBuffer.descriptorBufferInfo;
 
 		vkUpdateDescriptorSets(device->logicalDevice, 1, &writeDescriptorSet, 0, nullptr);
 	}

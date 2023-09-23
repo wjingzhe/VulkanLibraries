@@ -92,7 +92,7 @@ public:
 	{
 		VkFramebuffer frameBuffer;
 		FrameBufferAttachment color, depth;
-		VkDescriptorImageInfo descriptor;
+		VkDescriptorImageInfo descriptorImageInfo;
 	};
 
 	struct OffscreenPass
@@ -241,9 +241,9 @@ public:
 		VK_CHECK_RESULT(vkCreateFramebuffer(device, &fBufCreateInfo, nullptr, &frameBuf->frameBuffer));
 
 		//Fill a descriptor for later use in a descriptor set
-		frameBuf->descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		frameBuf->descriptor.imageView = frameBuf->color.view;
-		frameBuf->descriptor.sampler = offscreenPass.sampler;
+		frameBuf->descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		frameBuf->descriptorImageInfo.imageView = frameBuf->color.view;
+		frameBuf->descriptorImageInfo.sampler = offscreenPass.sampler;
 	}
 
 	// Prepare the off-screen frame buffers used for the vertical and horizontal blur
@@ -527,7 +527,7 @@ public:
 
 		writeDescriptorSets = {
 			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptorBufferInfo),  // Binding 0: Fragment shader uniform buffer
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[0].descriptor), //Binding 1: Fragment shader texture sampler
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurVert,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[0].descriptorImageInfo), //Binding 1: Fragment shader texture sampler
 		};
 
 		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
@@ -536,7 +536,7 @@ public:
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.blurHorz));
 		writeDescriptorSets = {
 			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.blurParams.descriptorBufferInfo), //Binding 0: Fragment shader uniform buffer
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[1].descriptor), // Binding 1: Fragment shader texture sampler
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.blurHorz,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&offscreenPass.frameBuffers[1].descriptorImageInfo), // Binding 1: Fragment shader texture sampler
 		};
 		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 
@@ -552,7 +552,7 @@ public:
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo, &descriptorSets.skyBox));
 		writeDescriptorSets = {
 			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformBuffers.skyBox.descriptorBufferInfo), // Binding 0: Vertex shader uniform buffer
-			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&cubeMap.descriptor),  //Binding 1: Fragment shader texture sampler
+			vks::initializers::GenWriteDescriptorSet(descriptorSets.skyBox,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1,&cubeMap.descriptorImageInfo),  //Binding 1: Fragment shader texture sampler
 		};
 		vkUpdateDescriptorSets(device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, NULL);
 	}//setupDescriptorSet
