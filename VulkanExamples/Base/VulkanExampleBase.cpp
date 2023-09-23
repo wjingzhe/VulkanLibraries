@@ -1684,7 +1684,7 @@ void VulkanExampleBase::drawUI(const VkCommandBuffer commandBuffer)
 
 void VulkanExampleBase::prepareFrame()
 {
-	//Acquire the next image from the swap chain
+	//Acquire the next image from the swap chain 并置位已完成上一帧绘制结果的present切换的信号量
 	VkResult result = swapChain.acquireNextImage(semaphores.presentComplete, &currentBuffer);
 
 	//Recreate the swap chain if it's no longer compatible with the surface (OUT_OF_DATE) or no longer optimal for presentation (SUBOPTIMAL)
@@ -1714,7 +1714,7 @@ void VulkanExampleBase::submitFrame()
 		}
 	}
 
-	VK_CHECK_RESULT(vkQueueWaitIdle(queue));
+	VK_CHECK_RESULT(vkQueueWaitIdle(queue));//提交完命令后忙等队列完成渲染操作
 }
 
 void VulkanExampleBase::renderFrame()
