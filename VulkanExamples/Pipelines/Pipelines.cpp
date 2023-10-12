@@ -82,7 +82,7 @@ public:
 		}
 	}
 
-	void buildCommandBuffersAndRenderPrmitives()
+	void buildCommandBuffersForPreRenderPrmitives()
 	{
 		VkCommandBufferBeginInfo cmdBufferBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
 
@@ -150,7 +150,7 @@ public:
 			VK_CHECK_RESULT(vkEndCommandBuffer(drawCmdBuffers[i]));
 		}//for
 
-	}//buildCommandBuffersAndRenderPrmitives
+	}//buildCommandBuffersForPreRenderPrmitives
 
 	void loadAssets()
 	{
@@ -287,7 +287,7 @@ public:
 		VulkanExampleBase::prepareFrame();
 
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &drawCmdBuffers[currentBuffer];
+		submitInfo.pCommandBuffers = &drawCmdBuffers[currentCmdBufferIndex];
 		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
 		VulkanExampleBase::submitFrame();
@@ -303,7 +303,7 @@ public:
 		//实际的管线状态要组装或读写uniform，还需要描述符Set对象
 		setupDescriptorPool();
 		setupDescriptorSet();
-		buildCommandBuffersAndRenderPrmitives();
+		buildCommandBuffersForPreRenderPrmitives();
 		prepared = true;
 	}//prepareForRendering
 

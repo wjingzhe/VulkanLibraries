@@ -339,7 +339,7 @@ public:
 		prepareOffscreenFramebuffer(&offscreenPass.frameBuffers[1], FB_COLOR_FORMAT, fbDepthFormat);
 	}
 
-	void buildCommandBuffersAndRenderPrmitives()
+	void buildCommandBuffersForPreRenderPrmitives()
 	{
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::GenCommandBufferBeginInfo();
 
@@ -461,7 +461,7 @@ public:
 			VK_CHECK_RESULT(vkEndCommandBuffer(drawCmdBuffers[i]));
 
 		}// for drawCmdBuffers[i]
-	}//buildCommandBuffersAndRenderPrmitives
+	}//buildCommandBuffersForPreRenderPrmitives
 
 	void loadAssets()
 	{
@@ -699,7 +699,7 @@ public:
 	{
 		VulkanExampleBase::prepareFrame();
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &drawCmdBuffers[currentBuffer];
+		submitInfo.pCommandBuffers = &drawCmdBuffers[currentCmdBufferIndex];
 		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 		VulkanExampleBase::submitFrame();
 	}
@@ -714,7 +714,7 @@ public:
 		preparePipelines();
 		setupDescriptorPool();
 		setupDescriptorSet();
-		buildCommandBuffersAndRenderPrmitives();
+		buildCommandBuffersForPreRenderPrmitives();
 		prepared = true;
 	}
 
@@ -739,7 +739,7 @@ public:
 		{
 			if (overlay->checkBox("Bloom",&bloom))
 			{
-				buildCommandBuffersAndRenderPrmitives();
+				buildCommandBuffersForPreRenderPrmitives();
 			}
 
 			if (overlay->inputFloat("Scale",&ubos.blurParams.blurScale,0.1f,2))

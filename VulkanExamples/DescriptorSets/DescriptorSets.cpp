@@ -72,7 +72,7 @@ public:
 		}
 	}//getEnabledFeatures
 
-	void buildCommandBuffersAndRenderPrmitives() override
+	void buildCommandBuffersForPreRenderPrmitives() override
 	{
 		VkCommandBufferBeginInfo cmdBufBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
 
@@ -124,7 +124,7 @@ public:
 
 			VK_CHECK_RESULT(vkEndCommandBuffer(drawCmdBuffers[i]));
 		}//for
-	}//buildCommandBuffersAndRenderPrmitives
+	}//buildCommandBuffersForPreRenderPrmitives
 
 	void loadAssets()
 	{
@@ -335,7 +335,7 @@ public:
 	{
 		VulkanExampleBase::prepareFrame();
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &drawCmdBuffers[currentBuffer];
+		submitInfo.pCommandBuffers = &drawCmdBuffers[currentCmdBufferIndex];
 		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 		VulkanExampleBase::submitFrame();
 	}//draw
@@ -347,7 +347,7 @@ public:
 		prepareUniformBuffers();
 		setupDescriptSets();
 		preparePipelines();
-		buildCommandBuffersAndRenderPrmitives();
+		buildCommandBuffersForPreRenderPrmitives();
 		prepared = true;
 	}
 

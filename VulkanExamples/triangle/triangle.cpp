@@ -227,7 +227,7 @@ public:
 	// Build separate command buffers for every frameBuffer image
 	// Unlike in OpenGL all rendering commands are recorded once into command buffers that are then resubmitted to the queue
 	// This allows to generate work upfront and from multiple threads, one of the biggest advantages of Vulkan
-	void buildCommandBuffersAndRenderPrmitives()
+	void buildCommandBuffersForPreRenderPrmitives()
 	{
 		VkCommandBufferBeginInfo cmdBufferInfo = {};
 		cmdBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -305,11 +305,11 @@ public:
 	void draw()
 	{
 		// Get next image in the swap chain (back/front buffer)
-		VK_CHECK_RESULT(swapChain.acquireNextImage(presentCompleteSemaphore, &currentBuffer));
+		VK_CHECK_RESULT(swapChain.acquireNextImage(presentCompleteSemaphore, &currentCmdBufferIndex));
 
 		// Use a fence to wait until the command buffer has finished execution before using it again
-		VK_CHECK_RESULT(vkWaitForFences(device, 1, &waitFences[currentBuffer], VK_TRUE, UINT64_MAX));
-		VK_CHECK_RESULT(vkResetFences(device, 1, &waitFences[currentBuffer]));
+		VK_CHECK_RESULT(vkWaitForFences(device, 1, &waitFences[currentCmdBufferIndex], VK_TRUE, UINT64_MAX));
+		VK_CHECK_RESULT(vkResetFences(device, 1, &waitFences[currentCmdBufferIndex]));
 
 		// Pipeline stage at which the queue submission will wait (via pWaitSemaphores)
 		VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -321,16 +321,16 @@ public:
 		submitInfo.waitSemaphoreCount = 1; //One wait semaphore
 		submitInfo.pSignalSemaphores = &renderCompleteSemaphore; //Semaphore(s) to be signed when command buffers have completed
 		submitInfo.signalSemaphoreCount = 1; // One signal semaphore
-		submitInfo.pCommandBuffers = &drawCmdBuffers[currentBuffer]; //Command buffer(s) to execute in this batch (submission)
+		submitInfo.pCommandBuffers = &drawCmdBuffers[currentCmdBufferIndex]; //Command buffer(s) to execute in this batch (submission)
 		submitInfo.commandBufferCount = 1; // One command buffer
 
 		// Submit to the graphics queue passing a wait fence
-		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, waitFences[currentBuffer]));
+		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, waitFences[currentCmdBufferIndex]));
 
 		// Present the current buffer to the swap chain
 		// Pass the semaphore signaled by the command buffer submission from the submit info as the wait semaphore for swap chain presentation
 		// This ensures that the image is not presented to the windowing system until all commands have been submitted
-		VkResult present = swapChain.queuePresent(queue, currentBuffer, renderCompleteSemaphore);
+		VkResult present = swapChain.queuePresent(queue, currentCmdBufferIndex, renderCompleteSemaphore);
 		if ( !((present == VK_SUCCESS) || (present == VK_SUBOPTIMAL_KHR)))
 		{
 			VK_CHECK_RESULT(present);
@@ -1058,7 +1058,7 @@ public:
 		preparePipelines();
 		setupDescriptorPool();
 		setupDescriptorSet();
-		buildCommandBuffersAndRenderPrmitives();
+		buildCommandBuffersForPreRenderPrmitives();
 		prepared = true;
 	}
 

@@ -172,7 +172,7 @@ void VulkanExampleBase::windowResize()
 	// Command buffers need to be created as they may store references to the recreated frame buffer
 	destroyCommandBuffers();
 	createCommandBuffers();
-	buildCommandBuffersAndRenderPrmitives();
+	buildCommandBuffersForPreRenderPrmitives();
 
 	vkDeviceWaitIdle(device);
 
@@ -314,7 +314,7 @@ void VulkanExampleBase::updateOverlay()
 	ImGui::Render();
 
 	if (uiOverlay.update() || uiOverlay.updated) {
-		buildCommandBuffersAndRenderPrmitives();
+		buildCommandBuffersForPreRenderPrmitives();
 		uiOverlay.updated = false;
 	}
 
@@ -1085,7 +1085,7 @@ void VulkanExampleBase::windowResized()
 {
 }
 
-void VulkanExampleBase::buildCommandBuffersAndRenderPrmitives()
+void VulkanExampleBase::buildCommandBuffersForPreRenderPrmitives()
 {
 }
 
@@ -1685,7 +1685,7 @@ void VulkanExampleBase::drawUI(const VkCommandBuffer commandBuffer)
 void VulkanExampleBase::prepareFrame()
 {
 	//Acquire the next image from the swap chain 并置位已完成上一帧绘制结果的present切换的信号量
-	VkResult result = swapChain.acquireNextImage(semaphores.presentComplete, &currentBuffer);
+	VkResult result = swapChain.acquireNextImage(semaphores.presentComplete, &currentCmdBufferIndex);
 
 	//Recreate the swap chain if it's no longer compatible with the surface (OUT_OF_DATE) or no longer optimal for presentation (SUBOPTIMAL)
 	if (result==VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
@@ -1700,7 +1700,7 @@ void VulkanExampleBase::prepareFrame()
 
 void VulkanExampleBase::submitFrame()
 {
-	VkResult result = swapChain.queuePresent(queue, currentBuffer, semaphores.renderComplete);
+	VkResult result = swapChain.queuePresent(queue, currentCmdBufferIndex, semaphores.renderComplete);
 	if (!(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR))
 	{
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -1721,7 +1721,7 @@ void VulkanExampleBase::renderFrame()
 {
 	VulkanExampleBase::prepareFrame();
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &drawCmdBuffers[currentBuffer];
+	submitInfo.pCommandBuffers = &drawCmdBuffers[currentCmdBufferIndex];
 
 	VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
