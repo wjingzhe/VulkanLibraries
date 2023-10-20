@@ -274,7 +274,7 @@ public:
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriprtorPoolInfo, nullptr, &descriptorPool));
 	}
 
-	void  setupDescriptorSetLayout()
+	void  setupDescriptorSetLayoutAndPipelineLayout()
 	{
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings =
 		{
@@ -459,7 +459,7 @@ public:
 		generateCube();
 		setupVertexDescriptons();
 		prepareUniformBuffers();
-		setupDescriptorSetLayout();
+		setupDescriptorSetLayoutAndPipelineLayout();
 		preparePipelines();
 		setupDescriptorPool();
 		setupDescriptorSet();

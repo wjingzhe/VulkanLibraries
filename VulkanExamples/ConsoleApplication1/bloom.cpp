@@ -482,7 +482,7 @@ public:
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 	}
 
-	void setupDescriptorSetLayout()
+	void setupDescriptorSetLayoutAndPipelineLayout()
 	{
 		std::vector<VkDescriptorSetLayoutBinding>setLayoutBindings;
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
@@ -710,7 +710,7 @@ public:
 		loadAssets();
 		prepareUniformBuffers();
 		prepareOffscreen();
-		setupDescriptorSetLayout();
+		setupDescriptorSetLayoutAndPipelineLayout();
 		preparePipelines();
 		setupDescriptorPool();
 		setupDescriptorSet();

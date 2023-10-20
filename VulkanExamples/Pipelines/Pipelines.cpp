@@ -170,7 +170,7 @@ public:
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 	}//setupDescriptorPool
 
-	void setupDescriptorSetLayout()
+	void setupDescriptorSetLayoutAndPipelineLayout()
 	{
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = 
 		{
@@ -298,7 +298,7 @@ public:
 		VulkanExampleBase::prepareForRendering();
 		loadAssets();
 		prepareUnifomrBuffers();
-		setupDescriptorSetLayout();
+		setupDescriptorSetLayoutAndPipelineLayout();
 		preparePipelines();
 		//实际的管线状态要组装或读写uniform，还需要描述符Set对象
 		setupDescriptorPool();

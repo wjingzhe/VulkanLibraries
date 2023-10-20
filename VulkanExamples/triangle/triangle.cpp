@@ -538,7 +538,7 @@ public:
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 	}
 
-	void setupDescriptorSetLayout()
+	void setupDescriptorSetLayoutAndPipelineLayout()
 	{
 		// Setup layout of descriptors used in this example
 		// Basically connects the different shader stages to descriptors for binding uniform buffers,image samplers,etc
@@ -1054,7 +1054,7 @@ public:
 		prepareSynchronizationPrimitives();
 		prepareVertices(USE_STAGING);
 		prepareUniformBuffers();
-		setupDescriptorSetLayout();
+		setupDescriptorSetLayoutAndPipelineLayout();
 		preparePipelines();
 		setupDescriptorPool();
 		setupDescriptorSet();
