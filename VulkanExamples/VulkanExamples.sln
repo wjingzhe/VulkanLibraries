@@ -39,6 +39,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpecializationConstants", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Texture", "Texture\Texture.vcxproj", "{3B09D01F-B517-4D3C-8891-43E3B24D6AE1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InputAttachments", "InputAttachments\InputAttachments.vcxproj", "{F15398CB-BF86-4B14-B524-A542299F5253}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -119,6 +121,14 @@ Global
 		{3B09D01F-B517-4D3C-8891-43E3B24D6AE1}.Release|x64.Build.0 = Release|x64
 		{3B09D01F-B517-4D3C-8891-43E3B24D6AE1}.Release|x86.ActiveCfg = Release|Win32
 		{3B09D01F-B517-4D3C-8891-43E3B24D6AE1}.Release|x86.Build.0 = Release|Win32
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Debug|x64.ActiveCfg = Debug|x64
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Debug|x64.Build.0 = Debug|x64
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Debug|x86.ActiveCfg = Debug|Win32
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Debug|x86.Build.0 = Debug|Win32
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Release|x64.ActiveCfg = Release|x64
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Release|x64.Build.0 = Release|x64
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Release|x86.ActiveCfg = Release|Win32
+		{F15398CB-BF86-4B14-B524-A542299F5253}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
