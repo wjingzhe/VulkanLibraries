@@ -14,7 +14,7 @@ public:
 	CameraType cameraType = CameraType::lookat;
 
 	glm::vec3 rotation = glm::vec3();
-	glm::vec3 _position = glm::vec3();
+	glm::vec3 position = glm::vec3();
 	glm::vec4 viewPos = glm::vec4();
 
 	float rotationSpeed = 1.0f;
@@ -75,7 +75,7 @@ public:
 
 	void setPosition(glm::vec3 position)
 	{
-		this->_position = position;
+		this->position = position;
 		updateViewMatrix();
 	}
 
@@ -93,13 +93,13 @@ public:
 
 	void setTranslation(glm::vec3 translation)
 	{
-		this->_position = translation;
+		this->position = translation;
 		updateViewMatrix();
 	}
 
 	void translate(glm::vec3 delta)
 	{
-		this->_position += delta;
+		this->position += delta;
 		updateViewMatrix();
 	}
 
@@ -125,19 +125,19 @@ public:
 
 				 if (keys.up)
 				 {
-					 _position += camFront * moveSpeed;
+					 position += camFront * moveSpeed;
 				 }
 				 if (keys.down)
 				 {
-					 _position -= camFront * moveSpeed;
+					 position -= camFront * moveSpeed;
 				 }
 				 if (keys.left)
 				 {
-					 _position -= glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f)))*moveSpeed;
+					 position -= glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f)))*moveSpeed;
 				 }
 				 if (keys.right)
 				 {
-					 _position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f)))*moveSpeed;
+					 position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f)))*moveSpeed;
 				 }
 
 				 updateViewMatrix();
@@ -172,14 +172,14 @@ public:
 			if (fabsf(axisLeft.y) > deadZone)
 			{
 				float pos = (fabsf(axisLeft.y) - deadZone) / range;
-				_position -= camFront * pos*((axisLeft.y < 0.0f) ? -1.0f : 1.0f)*moveSpeed;
+				position -= camFront * pos*((axisLeft.y < 0.0f) ? -1.0f : 1.0f)*moveSpeed;
 				retVal = true;
 			}
 
 			if (fabsf(axisLeft.x)>deadZone)
 			{
 				float pos = (fabsf(axisLeft.x) - deadZone) / range;
-				_position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) *pos*((axisLeft.x < 0.0f) ? -1.0f : 1.0f)*moveSpeed;
+				position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) *pos*((axisLeft.x < 0.0f) ? -1.0f : 1.0f)*moveSpeed;
 				retVal = true;
 			}
 
@@ -220,7 +220,7 @@ protected:
 		rotM = glm::rotate(rotM, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 		rotM = glm::rotate(rotM, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		glm::vec3 translation = _position;
+		glm::vec3 translation = position;
 		if (flipY)
 		{
 			translation.y *= -1.0f;
@@ -236,7 +236,7 @@ protected:
 			matrices.view = transM * rotM;
 		}
 
-		viewPos = glm::vec4(_position, 0.0f)*glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
+		viewPos = glm::vec4(position, 0.0f)*glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
 		updated = true;
 	}
 

@@ -386,12 +386,12 @@ namespace vks
 			return pipelineColorBlendAttachmentState;
 		}
 
-		inline VkPipelineColorBlendStateCreateInfo GenPipelineColorBlendStateCreateInfo(uint32_t attachmentCount, const VkPipelineColorBlendAttachmentState* pAttachments)
+		inline VkPipelineColorBlendStateCreateInfo GenPipelineColorBlendStateCreateInfo(uint32_t blendAttachmentCount, const VkPipelineColorBlendAttachmentState* pBlendAttachmentStates)
 		{
 			VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo{};
 			pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-			pipelineColorBlendStateCreateInfo.attachmentCount = attachmentCount;
-			pipelineColorBlendStateCreateInfo.pAttachments = pAttachments;
+			pipelineColorBlendStateCreateInfo.attachmentCount = blendAttachmentCount;
+			pipelineColorBlendStateCreateInfo.pAttachments = pBlendAttachmentStates;
 			return pipelineColorBlendStateCreateInfo;
 		}
 

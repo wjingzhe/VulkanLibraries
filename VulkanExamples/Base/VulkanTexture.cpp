@@ -275,10 +275,10 @@ namespace vks
 		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		viewCreateInfo.format = format;
 		viewCreateInfo.components = { VK_COMPONENT_SWIZZLE_R,VK_COMPONENT_SWIZZLE_G,VK_COMPONENT_SWIZZLE_B,VK_COMPONENT_SWIZZLE_A };
-
+		viewCreateInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 		// Linear tiling usually won't support mip maps
 		// Only set mip map count if optimal tiling is used
-		viewCreateInfo.subresourceRange.layerCount = (useStaging) ? mipLevels : 1;
+		viewCreateInfo.subresourceRange.levelCount = (useStaging) ? mipLevels : 1;
 		viewCreateInfo.image = image;
 		VK_CHECK_RESULT(vkCreateImageView(device->logicalDevice, &viewCreateInfo, nullptr, &view));
 
