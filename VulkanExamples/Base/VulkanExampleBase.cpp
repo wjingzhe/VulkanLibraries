@@ -628,7 +628,7 @@ bool VulkanExampleBase::initVulkanSetting()
 	// Vulkan device creation
 	// This is handled by a separate class that gets a logical device representation and encapsulates functions related to a device
 	vulkanDevice = new vks::VulkanDevice(physicalDevice);
-	VkResult res = vulkanDevice->CreateLogicalDevice(curEnabledDeviceFeatures, enableDeviceExtensions, deviceCreateNextChain);
+	VkResult res = vulkanDevice->CreateLogicalDevice(curEnabledDeviceFeatures, enabledDeviceExtensions, deviceCreateNextChain);
 	if (res != VK_SUCCESS)
 	{
 		vks::tools::exitFatal("Could not create Vulkan device: \n" + vks::tools::errorString(res), res);
@@ -1006,9 +1006,9 @@ VkResult VulkanExampleBase::createInstance(bool enableValidation)
 	}//if extCount
 
 	//Enable requested instance extensions
-	if (enableInstanceExtensions.size()>0)
+	if (enabledInstanceExtensions.size()>0)
 	{
-		for (const char* enableExtension :enableInstanceExtensions)
+		for (const char* enableExtension :enabledInstanceExtensions)
 		{
 			//Output message if requested extension is not available
 			if (std::find(supportedInstanceExtensions.begin(),supportedInstanceExtensions.end(),enableExtension)==supportedInstanceExtensions.end())
