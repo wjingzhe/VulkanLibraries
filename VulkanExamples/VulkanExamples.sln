@@ -47,6 +47,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RaytracingBasic", "Raytraci
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDR", "HDR\HDR.vcxproj", "{89235D86-92F3-4A61-A214-4BBD92F8242D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OcclusionQuery", "OcclusionQuery\OcclusionQuery.vcxproj", "{3F4C5399-604A-4769-BE7E-1FE91527F33A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -159,6 +161,14 @@ Global
 		{89235D86-92F3-4A61-A214-4BBD92F8242D}.Release|x64.Build.0 = Release|x64
 		{89235D86-92F3-4A61-A214-4BBD92F8242D}.Release|x86.ActiveCfg = Release|Win32
 		{89235D86-92F3-4A61-A214-4BBD92F8242D}.Release|x86.Build.0 = Release|Win32
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Debug|x64.ActiveCfg = Debug|x64
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Debug|x64.Build.0 = Debug|x64
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Debug|x86.ActiveCfg = Debug|Win32
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Debug|x86.Build.0 = Debug|Win32
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Release|x64.ActiveCfg = Release|x64
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Release|x64.Build.0 = Release|x64
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Release|x86.ActiveCfg = Release|Win32
+		{3F4C5399-604A-4769-BE7E-1FE91527F33A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
