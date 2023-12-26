@@ -304,24 +304,40 @@ public:
 			
 			glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-			// Occulsion pass
-			vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.simple);
+			//// Occulsion pass
+			//vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.simple);
 
-			// 先绘制遮挡物，类似于pre-z
-			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &occluderDescriptorSet, 0, nullptr);
-			models.plane.draw(drawCmdBuffers[i]);
+			//// 先绘制遮挡物，类似于pre-z
+			//vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &occluderDescriptorSet, 0, nullptr);
+			//models.plane.draw(drawCmdBuffers[i]);
 
-			//创建Teapot的查询操作
-			vkCmdBeginQuery(drawCmdBuffers[i], queryPool, 0, VK_FLAGS_NONE);
-			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.teapot, 0, nullptr);
-			models.teapot.draw(drawCmdBuffers[i]);
-			vkCmdEndQuery(drawCmdBuffers[i], queryPool,0);
+			//{//证实：查询结果是在RT上保存的
+			//	VkClearAttachment clearAttachments[2] = {};
+			//	clearAttachments[0].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			//	clearAttachments[0].clearValue.color = defaultClearColor;
+			//	clearAttachments[0].colorAttachment = 0;
+			//	clearAttachments[1].aspectMask = VK_IMAGE_ASPECT_NONE;
+			//	clearAttachments[1].clearValue.depthStencil = { 1.0f,0 };
 
-			//创建Spere的查询操作
-			vkCmdBeginQuery(drawCmdBuffers[i], queryPool, 1, VK_FLAGS_NONE);
-			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.sphere, 0, nullptr);
-			models.sphere.draw(drawCmdBuffers[i]);
-			vkCmdEndQuery(drawCmdBuffers[i], queryPool, 1);
+			//	VkClearRect clearRect = {};
+			//	clearRect.layerCount = 1;
+			//	clearRect.rect.offset = { 0,0 };
+			//	clearRect.rect.extent = { width,height };
+
+			//	vkCmdClearAttachments(drawCmdBuffers[i], 2, clearAttachments, 1, &clearRect);
+			//}
+
+			////创建Teapot的查询操作
+			//vkCmdBeginQuery(drawCmdBuffers[i], queryPool, 0, VK_FLAGS_NONE);
+			//vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.teapot, 0, nullptr);
+			//models.teapot.draw(drawCmdBuffers[i]);
+			//vkCmdEndQuery(drawCmdBuffers[i], queryPool,0);
+
+			////创建Spere的查询操作
+			//vkCmdBeginQuery(drawCmdBuffers[i], queryPool, 1, VK_FLAGS_NONE);
+			//vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.sphere, 0, nullptr);
+			//models.sphere.draw(drawCmdBuffers[i]);
+			//vkCmdEndQuery(drawCmdBuffers[i], queryPool, 1);
 
 			//好好画个深度不好吗？？
 			// Clear color and depth attachments
@@ -341,21 +357,26 @@ public:
 			vkCmdClearAttachments(drawCmdBuffers[i], 2, clearAttachments, 1, &clearRect);
 
 			// 开启可见几何图形绘制
-			// Visible pass
-			vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.solid);
-
-			// Teapot
-			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.teapot, 0, NULL);
-			models.teapot.draw(drawCmdBuffers[i]);
-
-			// Sphere
-			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.sphere, 0, NULL);
-			models.sphere.draw(drawCmdBuffers[i]);
-
+			
 			// Occluder
 			vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.occluder);
 			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &occluderDescriptorSet, 0, NULL);
 			models.plane.draw(drawCmdBuffers[i]);
+
+			// Visible pass
+			vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.solid);
+
+			// Teapot
+			vkCmdBeginQuery(drawCmdBuffers[i], queryPool, 0, VK_FLAGS_NONE);
+			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.teapot, 0, NULL);
+			models.teapot.draw(drawCmdBuffers[i]);
+			vkCmdEndQuery(drawCmdBuffers[i], queryPool, 0);
+
+			// Sphere
+			vkCmdBeginQuery(drawCmdBuffers[i], queryPool, 1, VK_FLAGS_NONE);
+			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &geometryDescriptorSets.sphere, 0, NULL);
+			models.sphere.draw(drawCmdBuffers[i]);
+			vkCmdEndQuery(drawCmdBuffers[i], queryPool, 1);
 
 			drawUI(drawCmdBuffers[i]);
 
