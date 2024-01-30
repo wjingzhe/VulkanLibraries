@@ -95,9 +95,9 @@ public:
 		VkPipeline plants;
 	} pipelines;
 
-	VkPipelineLayout pipelineLayout;
-	VkDescriptorSet descriptorSet;
-	VkDescriptorSetLayout descriptorSetLayout;
+	VkPipelineLayout pipelineLayout_IndirectDraw;
+	VkDescriptorSet descriptorSet_IndirectDraw;
+	VkDescriptorSetLayout descriptorSetLayout_IndirectDraw;
 
 	uint32_t objectCount = 0;
 
@@ -115,8 +115,8 @@ public:
 	~VulkanExample()
 	{
 		vkDestroyPipeline(device, pipelines.plants, nullptr);
-		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+		vkDestroyPipelineLayout(device, pipelineLayout_IndirectDraw, nullptr);
+		vkDestroyDescriptorSetLayout(device, descriptorSetLayout_IndirectDraw, nullptr);
 
 		instanceBuffer.destroy();
 		indirectCommandsBuffer.destroy();
@@ -156,7 +156,7 @@ public:
 		memcpy(uniformData.scene.mappedData, &uboSceneTransformDatas, sizeof(uboSceneTransformDatas));
 	}
 
-	void prepareBuffers()
+	void prepareBuffersForIndirectDrawAndComputeLOD()
 	{
 		objectCount = OBJECT_COUNT * OBJECT_COUNT*OBJECT_COUNT;
 
@@ -255,7 +255,7 @@ public:
 		updateUniformBuffer(true);
 	}
 
-	void setupDescriptorSetLayoutAndPipelineLayout()
+	void setupDescriptorSetLayoutAndPipelineLayout_IndirectDraw()
 	{
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings =
 		{
@@ -263,13 +263,13 @@ public:
 			vks::initializers::GenDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,VK_SHADER_STAGE_VERTEX_BIT,0),
 		};
 		VkDescriptorSetLayoutCreateInfo descritptorLayoutCreateInfo = vks::initializers::GenDescriptorSetLayoutCreateInfo(setLayoutBindings);
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descritptorLayoutCreateInfo, nullptr, &descriptorSetLayout));
+		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descritptorLayoutCreateInfo, nullptr, &descriptorSetLayout_IndirectDraw));
 
-		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vks::initializers::GenPipelineLayoutCreateInfo(&descriptorSetLayout, 1);
-		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
+		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vks::initializers::GenPipelineLayoutCreateInfo(&descriptorSetLayout_IndirectDraw, 1);
+		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout_IndirectDraw));
 	}
 
-	void preparePipelines()
+	void preparePipelines_IndirectDraw()
 	{
 		// This example uses two different input stats, one for the instanced part and one for non-instanced rendering
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCI = vks::initializers::GenPipelineVertexInputStateCreateInfo();
@@ -318,7 +318,7 @@ public:
 		VkPipelineDynamicStateCreateInfo dynamicStateCI = vks::initializers::GenPipelineDynamicStateCreateInfo(dynamicStateEnables);
 		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::GenPipelineCreateInfo(pipelineLayout, renderPass);
+		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::GenPipelineCreateInfo(pipelineLayout_IndirectDraw, renderPass);
 		pipelineCreateInfo.pVertexInputState = &vertexInputStateCI;
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCI;
 		pipelineCreateInfo.pRasterizationState = &rasterizationStateCI;
@@ -338,24 +338,24 @@ public:
 
 	void setupDescriptorPool()
 	{
-		std::vector<VkDescriptorPoolSize> poolSizes =
+		std::vector<VkDescriptorPoolSize> poolSizesForIndirectDrawAndCompute =
 		{
 			vks::initializers::GenDescriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,2),
 			vks::initializers::GenDescriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,4),
 		};
-		VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::GenDescriptorPoolCreateInfo(poolSizes, 2);
+		VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::GenDescriptorPoolCreateInfo(poolSizesForIndirectDrawAndCompute, 2);
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 	}
 
-	void setupDescriptorSetAndUpdate()
+	void setupDescriptorSetAndUpdate_IndirectDraw()
 	{
-		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
-		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet));
+		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::GenDescriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout_IndirectDraw, 1);
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet_IndirectDraw));
 
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets =
 		{
 			// Binding 0: Vertex shader uniform buffer
-			vks::initializers::GenWriteDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformData.scene.descriptorBufferInfo),
+			vks::initializers::GenWriteDescriptorSet(descriptorSet_IndirectDraw,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,0,&uniformData.scene.descriptorBufferInfo),
 		};
 		vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 	}
@@ -530,7 +530,7 @@ public:
 			VkRect2D scissor = vks::initializers::GenRect2D((float)width, (float)height, 0.0f, 1.0f);
 			vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
 
-			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, NULL);
+			vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_IndirectDraw, 0, 1, &descriptorSet_IndirectDraw, 0, NULL);
 
 			VkDeviceSize offsets[1] = { 0 };
 			// Mesh containing the LODs
@@ -565,11 +565,11 @@ public:
 	{
 		VulkanExampleBase::prepareForRendering();
 		loadAssets();
-		prepareBuffers();
-		setupDescriptorSetLayoutAndPipelineLayout();
-		preparePipelines();
+		prepareBuffersForIndirectDrawAndComputeLOD();
+		setupDescriptorSetLayoutAndPipelineLayout_IndirectDraw();
+		preparePipelines_IndirectDraw();
 		setupDescriptorPool();
-		setupDescriptorSetAndUpdate();
+		setupDescriptorSetAndUpdate_IndirectDraw();
 		prepareCompute();
 		buildCommandBuffersForPreRenderPrmitives();
 		prepared = true;
