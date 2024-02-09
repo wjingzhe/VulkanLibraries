@@ -280,7 +280,7 @@ public:
 		prepared = true;
 	}
 
-	void updateSecondaryCommandBuffers(VkCommandBufferInheritanceInfo inheritanceInfo)
+	void updateSecondaryCommandBuffersForSceneBackgroundAndUI(VkCommandBufferInheritanceInfo inheritanceInfo)
 	{
 		// Secondary command buffer for the sky sphere
 		VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
@@ -407,6 +407,28 @@ public:
 	// that's last submitted to the queue for rendering
 	void updateCommandBuffers(VkFramebuffer frameBuffer)
 	{
+		// Inheritance info for the secondary command buffers
+		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
+		inheritanceInfo.renderPass = renderPass;
+		// Secondary command buffer also use the currently active framebuffer
+		inheritanceInfo.framebuffer = frameBuffer;
+
+		// Update secondary command buffers for scene background and UI
+		updateSecondaryCommandBuffersForSceneBackgroundAndUI(inheritanceInfo);
+
+		// Add a job to the thread's queue for each object to be rendered
+		for (uint32_t t = 0; t < numThreads; t++)
+		{
+			for (uint32_t i = 0; i < numObjectsPerThread; i++)
+			{
+				threadPool.threads[t]->addJob([=] {threadRenderCode(t, i, inheritanceInfo); });
+			}//for_i
+		}//for_t
+
+		/*
+			Reccord Primary Command Buffer
+		*/
+
 		// Contains the list of secondary command buffers to be submitted
 		std::vector<VkCommandBuffer> commandBuffers;
 
@@ -433,31 +455,12 @@ public:
 		// These are stored(and retrieved) from the secondary command buffers
 		vkCmdBeginRenderPass(primaryCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
-		// Inheritance info for the secondary command buffers
-		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
-		inheritanceInfo.renderPass = renderPass;
-		// Secondary command buffer also use the currently active framebuffer
-		inheritanceInfo.framebuffer = frameBuffer;
-
-		// Update secondary scene command buffers
-		updateSecondaryCommandBuffers(inheritanceInfo);
-
 		if (displayStarSphere)
 		{
 			commandBuffers.push_back(secondaryCommandBuffers.background);
 		}
 
-		// Add a job to the thread's queue for each object to be rendered
-		for (uint32_t t = 0; t < numThreads; t++)
-		{
-			for (uint32_t i = 0; i < numObjectsPerThread; i++)
-			{
-				threadPool.threads[t]->addJob([=] {threadRenderCode(t, i, inheritanceInfo); });
-			}//for_i
-		}//for_t
-
 		threadPool.wait();
-
 		// Only submit if object is within the current view frustum
 		for (uint32_t t = 0; t < numThreads; t++)
 		{
