@@ -136,6 +136,7 @@
     <ClInclude Include="benchmark.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="keycodes.hpp" />
+    <ClInclude Include="ThreadPool.hpp" />
     <ClInclude Include="VulkanBuffer.h" />
     <ClInclude Include="VulkanDebug.h" />
     <ClInclude Include="VulkanDevice.h" />
