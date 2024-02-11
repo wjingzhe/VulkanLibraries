@@ -13,13 +13,15 @@
 
 #include "VulkanglTFModel.h"
 
-#define ENABLE_VALIDATION false
+#define ENABLE_VALIDATION true
 
 class VulkanExample : public VulkanExampleBase
 {
 public:
 
 	bool displayStarSphere = true;
+	bool starBackgroundCmdBufferCacheDirty = true;
+	bool userInterfaceCmdCacheDirty = true;
 
 	struct
 	{
@@ -47,8 +49,11 @@ public:
 	// Secondary scene command buffers used to store backdrop and user interface
 	struct SecondaryCommandBuffers
 	{
-		VkCommandBuffer background;
-		VkCommandBuffer ui;
+		std::vector<VkCommandBuffer>backgrounds;
+		//VkCommandBuffer background;
+
+		std::vector<VkCommandBuffer>userInterfaces;
+		//VkCommandBuffer ui;
 	} secondaryCommandBuffers;
 
 	// Number of animated objects to be renderer
@@ -130,7 +135,20 @@ public:
 
 	~VulkanExample()
 	{
+		// Clean up used Vulkan resources
+		// Note :Inherited destructor cleans up resources stored in base class
+		vkDestroyPipeline(device, pipelines.phong, nullptr);
+		vkDestroyPipeline(device, pipelines.starsphere, nullptr);
 
+		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+
+		for (auto& thread :threadDatas )
+		{
+			vkFreeCommandBuffers(device, thread.commmandPool, thread.commandBuffers.size(), thread.commandBuffers.data());
+			vkDestroyCommandPool(device, thread.commmandPool, nullptr);
+		}
+
+		vkDestroyFence(device, renderFence, nullptr);
 	}
 
 	float rnd(float range)
@@ -151,8 +169,16 @@ public:
 
 		// Create additional secondary CBs for background and ui
 		cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &secondaryCommandBuffers.background));
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &secondaryCommandBuffers.ui));
+		for (size_t i = 0; i < swapChain.imageCount; i++)
+		{
+			secondaryCommandBuffers.backgrounds.push_back(VK_NULL_HANDLE);
+			VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &secondaryCommandBuffers.backgrounds[i]));
+		}
+		for (size_t i = 0; i < swapChain.imageCount; i++)
+		{
+			secondaryCommandBuffers.userInterfaces.push_back(VK_NULL_HANDLE);
+			VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &secondaryCommandBuffers.userInterfaces[i]));
+		}
 
 		threadDatas.resize(numThreads);
 
@@ -280,57 +306,91 @@ public:
 		prepared = true;
 	}
 
-	void updateSecondaryCommandBuffersForSceneBackgroundAndUI(VkCommandBufferInheritanceInfo inheritanceInfo)
+	void updateSecondaryCommandBuffersForSceneBackgroundAndUI()
 	{
-		// Secondary command buffer for the sky sphere
-		VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
-		commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-		commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
-
 		VkViewport viewport = vks::initializers::GenViewport((float)width, (float)height, 0.0f, 1.0f);
 		VkRect2D scissor = vks::initializers::GenRect2D(width, height, 0, 0);
 
 		/*
 		Background
 		*/
-		VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.background, &commandBufferBeginInfo));
+		if (starBackgroundCmdBufferCacheDirty)
 		{
-			vkCmdSetViewport(secondaryCommandBuffers.background, 0, 1, &viewport);
-			vkCmdSetScissor(secondaryCommandBuffers.background, 0, 1, &scissor);
+			for (size_t i = 0; i < swapChain.imageCount; i++)
+			{
+				// Inheritance info for the secondary command buffers
+				VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
+				inheritanceInfo.renderPass = renderPass;
+				// Secondary command buffer also use the currently active framebuffer
+				inheritanceInfo.framebuffer = frameBuffers[i];
 
-			vkCmdBindPipeline(secondaryCommandBuffers.background, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
+				// Secondary command buffer
+				VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
+				commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+				commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
 
-			glm::mat4 mvp = matrices.projection*matrices.view;
-			mvp[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);//Model to World Position
-			mvp = glm::scale(mvp, glm::vec3(2.0f));
+				vkResetCommandBuffer(secondaryCommandBuffers.backgrounds[i], 0);
 
-			vkCmdPushConstants(secondaryCommandBuffers.background, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+				VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.backgrounds[i], &commandBufferBeginInfo));
+				{
+					vkCmdSetViewport(secondaryCommandBuffers.backgrounds[i], 0, 1, &viewport);
+					vkCmdSetScissor(secondaryCommandBuffers.backgrounds[i], 0, 1, &scissor);
 
-			models.starSphere.draw(secondaryCommandBuffers.background);
+					vkCmdBindPipeline(secondaryCommandBuffers.backgrounds[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
+
+					glm::mat4 mvp = matrices.projection*matrices.view;
+					mvp[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);//Model to World Position
+					mvp = glm::scale(mvp, glm::vec3(2.0f));
+
+					vkCmdPushConstants(secondaryCommandBuffers.backgrounds[i], pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+
+					models.starSphere.draw(secondaryCommandBuffers.backgrounds[i]);
+				}
+				VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.backgrounds[i]));
+			}//for
+			
+			starBackgroundCmdBufferCacheDirty = false;
 		}
-		VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.background));
 
-
-		// 有必要吗？
 		/*
 			User interface
 
 			With VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS, the primary command buffer's content has to be defined
 			by secondary command buffers, which also applies to the UI overlay command buffer
 		*/
-		VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.ui, &commandBufferBeginInfo));
+		if (userInterfaceCmdCacheDirty)
 		{
-			vkCmdSetViewport(secondaryCommandBuffers.ui, 0, 1, &viewport);
-			vkCmdSetScissor(secondaryCommandBuffers.ui, 0, 1, &scissor);
+			for (size_t i = 0; i < swapChain.imageCount; i++)
+			{
+				// Inheritance info for the secondary command buffers
+				VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
+				inheritanceInfo.renderPass = renderPass;
+				// Secondary command buffer also use the currently active framebuffer
+				inheritanceInfo.framebuffer = frameBuffers[i];
 
-			vkCmdBindPipeline(secondaryCommandBuffers.ui, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
+				// Secondary command buffer
+				VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
+				commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+				commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
 
-			if (settings.overlay) {
-				drawUI(secondaryCommandBuffers.ui);
-			}
+				vkResetCommandBuffer(secondaryCommandBuffers.userInterfaces[i], 0);
+
+				VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.userInterfaces[i], &commandBufferBeginInfo));
+				{
+					vkCmdSetViewport(secondaryCommandBuffers.userInterfaces[i], 0, 1, &viewport);
+					vkCmdSetScissor(secondaryCommandBuffers.userInterfaces[i], 0, 1, &scissor);
+
+					vkCmdBindPipeline(secondaryCommandBuffers.userInterfaces[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
+
+					if (settings.overlay) {
+						drawUI(secondaryCommandBuffers.userInterfaces[i]);
+					}
+				}
+				VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.userInterfaces[i]));
+			}//for
+			
+			userInterfaceCmdCacheDirty = false;
 		}
-		VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.ui));
-
 	}
 
 	// Build the secondary command buffer for each thread
@@ -338,14 +398,6 @@ public:
 	{
 		ThreadData * thread = &threadDatas[threadIndex];
 		ObjectData * objectData = &thread->objectDatas[cmdBufferIndex];
-
-		// Check visibility against view frustum using a simple sphere check based on the radius of the mesh
-		objectData->visible = frustum.checkSphere(objectData->pos, models.ufo.dimensions.radius*0.5f);
-
-		if (!objectData->visible)
-		{
-			return;
-		}
 
 		// Update
 		if (!paused)
@@ -371,6 +423,14 @@ public:
 		objectData->model = glm::scale(objectData->model, glm::vec3(objectData->scale));
 
 		thread->pushConstBlocks[cmdBufferIndex].MVP = matrices.projection * matrices.view * objectData->model;
+
+		// Check visibility against view frustum using a simple sphere check based on the radius of the mesh
+		objectData->visible = frustum.checkSphere(objectData->pos, models.ufo.dimensions.radius*0.5f);
+
+		if (!objectData->visible)
+		{
+			return;
+		}
 
 		/*
 			Record Command
@@ -407,14 +467,14 @@ public:
 	// that's last submitted to the queue for rendering
 	void updateCommandBuffers(VkFramebuffer frameBuffer)
 	{
+		// Update secondary command buffers for scene background and UI
+		updateSecondaryCommandBuffersForSceneBackgroundAndUI();
+
 		// Inheritance info for the secondary command buffers
 		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
 		inheritanceInfo.renderPass = renderPass;
 		// Secondary command buffer also use the currently active framebuffer
 		inheritanceInfo.framebuffer = frameBuffer;
-
-		// Update secondary command buffers for scene background and UI
-		updateSecondaryCommandBuffersForSceneBackgroundAndUI(inheritanceInfo);
 
 		// Add a job to the thread's queue for each object to be rendered
 		for (uint32_t t = 0; t < numThreads; t++)
@@ -457,7 +517,7 @@ public:
 
 		if (displayStarSphere)
 		{
-			commandBuffers.push_back(secondaryCommandBuffers.background);
+			commandBuffers.push_back(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex]);
 		}
 
 		threadPool.wait();
@@ -476,7 +536,7 @@ public:
 		// Render UI last
 		if (uiOverlay.visible)
 		{
-			commandBuffers.push_back(secondaryCommandBuffers.ui);
+			commandBuffers.push_back(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]);
 		}
 
 		//使用继承信息分线程录制渲染命令，在主渲染流程中增加Secondary到主渲染命令Buffer中完成真正命令录制
@@ -533,7 +593,20 @@ public:
 		if (overlay->header("Settings")) {
 			overlay->checkBox("Stars", &displayStarSphere);
 		}
+	}
 
+	virtual void viewChanged() override
+	{
+		VulkanExampleBase::viewChanged();
+		//starBackgroundCmdBufferCacheDirty = true;
+	}
+
+	virtual void windowResized() override
+	{
+		VulkanExampleBase::windowResized();
+
+		starBackgroundCmdBufferCacheDirty = true;
+		userInterfaceCmdCacheDirty = true;
 	}
 
 private:
