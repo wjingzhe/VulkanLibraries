@@ -15,6 +15,8 @@
 
 #define ENABLE_VALIDATION false
 
+static int totalPrimitives = 0;
+
 class VulkanExample : public VulkanExampleBase
 {
 public:
@@ -95,7 +97,7 @@ public:
 		// One push constant block per render object
 		std::vector<ThreadPushConstantBlock> pushConstBlocks;
 		// Per object information(Position,rotation.etc)
-		std::vector<ObjectData>objectDatas;
+		std::vector<ObjectData> objectDatas;
 	};
 	std::vector<ThreadData> threadDatas;
 
@@ -315,7 +317,7 @@ public:
 	void updateSecondaryCommandBuffersForStarBackgroundAndUI()
 	{
 		// Inheritance info for the secondary command buffers
-		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
+		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheritanceInfo();
 		inheritanceInfo.renderPass = renderPass;
 		// Secondary command buffer also use the currently active framebuffer
 		inheritanceInfo.framebuffer = frameBuffers[currentCmdBufferIndex];
@@ -368,16 +370,16 @@ public:
 		*/
 		//if (userInterfaceCmdCacheDirty)
 		{
-			// Inheritance info for the secondary command buffers
-			VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
-			inheritanceInfo.renderPass = renderPass;
-			// Secondary command buffer also use the currently active framebuffer
-			inheritanceInfo.framebuffer = frameBuffers[currentCmdBufferIndex];
+			//// Inheritance info for the secondary command buffers
+			//VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheritanceInfo();
+			//inheritanceInfo.renderPass = renderPass;
+			//// Secondary command buffer also use the currently active framebuffer
+			//inheritanceInfo.framebuffer = frameBuffers[currentCmdBufferIndex];
 
-			// Secondary command buffer
-			VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
-			commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-			commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
+			//// Secondary command buffer
+			//VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
+			//commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+			//commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
 
 			vkResetCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0);
 
@@ -414,7 +416,7 @@ public:
 			VkRect2D scissor = vks::initializers::GenRect2D(width, height, 0, 0);
 
 			// Inheritance info for the secondary command buffers
-			VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
+			VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheritanceInfo();
 			inheritanceInfo.renderPass = renderPass;
 			// Secondary command buffer also use the currently active framebuffer
 			inheritanceInfo.framebuffer = frameBuffers[currentCmdBufferIndex];
@@ -460,7 +462,7 @@ public:
 			VkRect2D scissor = vks::initializers::GenRect2D(width, height, 0, 0);
 
 			// Inheritance info for the secondary command buffers
-			VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
+			VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheritanceInfo();
 			inheritanceInfo.renderPass = renderPass;
 			// Secondary command buffer also use the currently active framebuffer
 			inheritanceInfo.framebuffer = frameBuffers[currentCmdBufferIndex];
@@ -479,13 +481,16 @@ public:
 
 				vkCmdBindPipeline(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
 
-				if (settings.overlay) {
-					drawUI(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]);
+				if (settings.overlay)
+				{
+					if (drawUI(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]))
+					{
+						tempUserInterfaceCmdUpdatedFrameIndex++;
+					}//if drawUI
 				}
 			}
 			VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]));
 
-			tempUserInterfaceCmdUpdatedFrameIndex++;
 			if (tempUserInterfaceCmdUpdatedFrameIndex >= swapChain.imageCount)
 			{
 				tempUserInterfaceCmdUpdatedFrameIndex = 0;
@@ -569,7 +574,7 @@ public:
 	void updatePrimaryCommandBuffers(VkFramebuffer frameBuffer)
 	{
 		// Inheritance info for the secondary command buffers
-		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheriatanceInfo();
+		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheritanceInfo();
 		inheritanceInfo.renderPass = renderPass;
 		// Secondary command buffer also use the currently active framebuffer
 		inheritanceInfo.framebuffer = frameBuffer;
@@ -614,11 +619,13 @@ public:
 			commandBuffers.push_back(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex]);
 		}
 
+		totalPrimitives = 0;
 		// Add a job to the thread's queue for each object to be rendered
 		for (uint32_t t = 0; t < numThreads; t++)
 		{
 			for (uint32_t i = 0; i < numObjectsPerThread; i++)
 			{
+				totalPrimitives++;
 				threadPool.threads[t]->addJob([=] {threadRenderCode(t, i, inheritanceInfo); });
 			}//for_i
 		}//for_t
@@ -691,7 +698,7 @@ public:
 	virtual void OnUpdateUIOverlay(vks::UIOverlay *overlay)override
 	{
 		if (overlay->header("Statistics")) {
-			overlay->text("Active threads: %d", numThreads);
+			overlay->text("Active threads: %d", totalPrimitives);
 		}
 		if (overlay->header("Settings")) {
 			overlay->checkBox("Stars", &displayStarSphere);
@@ -701,9 +708,6 @@ public:
 	virtual void viewChanged() override
 	{
 		VulkanExampleBase::viewChanged();
-
-		userInterfaceCmdCacheDirty = true;
-		tempUserInterfaceCmdUpdatedFrameIndex = 0;
 	}
 
 	virtual void windowResized() override

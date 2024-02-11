@@ -73,7 +73,7 @@ namespace vks
 		void prepareResources();
 
 		bool update();
-		void draw(const VkCommandBuffer commandBuffer);
+		bool draw(const VkCommandBuffer commandBuffer);
 		void resize(uint32_t width, uint32_t height);
 
 		void freeResources();

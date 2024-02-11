@@ -1668,7 +1668,7 @@ void VulkanExampleBase::renderLoop()
 
 }
 
-void VulkanExampleBase::drawUI(const VkCommandBuffer commandBuffer)
+bool VulkanExampleBase::drawUI(const VkCommandBuffer commandBuffer)
 {
 	if (settings.overlay)
 	{
@@ -1678,8 +1678,9 @@ void VulkanExampleBase::drawUI(const VkCommandBuffer commandBuffer)
 		const VkRect2D scissor = vks::initializers::GenRect2D(width, height, 0, 0);
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-		uiOverlay.draw(commandBuffer);
+		return uiOverlay.draw(commandBuffer);
 	}
+	return false;
 }
 
 void VulkanExampleBase::prepareFrame()

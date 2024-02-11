@@ -351,14 +351,14 @@ namespace vks
 		return updateCmdBuffers;
 	}
 
-	void UIOverlay::draw(const VkCommandBuffer commandBuffer)
+	bool UIOverlay::draw(const VkCommandBuffer commandBuffer)
 	{
 		ImDrawData* imDrawData = ImGui::GetDrawData();
 		int32_t vertexOffset = 0;
 		int32_t indexOffset = 0;
 
 		if ((!imDrawData) || (imDrawData->CmdListsCount == 0)) {
-			return;
+			return false;
 		}
 
 		ImGuiIO& io = ImGui::GetIO();
@@ -391,6 +391,8 @@ namespace vks
 			}
 			vertexOffset += cmd_list->VtxBuffer.Size;
 		}
+
+		return true;
 	}
 
 	void UIOverlay::resize(uint32_t width, uint32_t height)

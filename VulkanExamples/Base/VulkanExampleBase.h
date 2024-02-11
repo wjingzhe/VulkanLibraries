@@ -402,7 +402,7 @@ public:
 
 	void renderLoop();
 
-	void drawUI(const VkCommandBuffer commandBuffer);
+	bool drawUI(const VkCommandBuffer commandBuffer);
 
 	void prepareFrame();
 
