@@ -64,7 +64,6 @@ public:
 #else
 		VkCommandBuffer ui;
 #endif // UI_COMMAND_ARRAY_CACHE
-
 	} secondaryCommandBuffers;
 
 	// Number of animated objects to be renderer
@@ -428,7 +427,6 @@ public:
 		}
 		VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.ui));
 #endif // UI_COMMAND_ARRAY_CACHE
-
 	}
 
 	void updateSecondaryCommandBuffersForStarBackground()
@@ -673,7 +671,6 @@ public:
 		}//for_t
 
 		// Render UI last
-		
 #ifdef UI_COMMAND_ARRAY_CACHE
 		if (uiOverlay.visible && !userInterfaceCmdCacheDirty)
 		{

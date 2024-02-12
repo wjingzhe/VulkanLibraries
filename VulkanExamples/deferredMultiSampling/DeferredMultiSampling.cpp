@@ -10,7 +10,7 @@
 #include "VulkanFrameBuffer.hpp"
 #include "VulkanglTFModel.h"
 
-#define ENABLE_VALIDATION true
+#define ENABLE_VALIDATION false
 
 #if defined(__ANDROID__)
 //Use max screen dimension as defined framebuffer size
