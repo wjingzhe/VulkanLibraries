@@ -16,6 +16,9 @@
 #define ENABLE_VALIDATION false
 
 static int totalPrimitives = 0;
+static int totalVisibleObjectCount = 0;
+
+//#define UI_COMMAND_ARRAY_CACHE
 
 class VulkanExample : public VulkanExampleBase
 {
@@ -56,8 +59,12 @@ public:
 		std::vector<VkCommandBuffer>backgrounds;
 		//VkCommandBuffer background;
 
+#ifdef UI_COMMAND_ARRAY_CACHE
 		std::vector<VkCommandBuffer>userInterfaces;
-		//VkCommandBuffer ui;
+#else
+		VkCommandBuffer ui;
+#endif // UI_COMMAND_ARRAY_CACHE
+
 	} secondaryCommandBuffers;
 
 	// Number of animated objects to be renderer
@@ -183,10 +190,17 @@ public:
 		{
 			secondaryCommandBuffers.backgrounds.push_back(VK_NULL_HANDLE);
 			VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &secondaryCommandBuffers.backgrounds[i]));
+		}
 
+#ifdef UI_COMMAND_ARRAY_CACHE
+		for (size_t i = 0; i < swapChain.imageCount; i++)
+		{
 			secondaryCommandBuffers.userInterfaces.push_back(VK_NULL_HANDLE);
 			VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &secondaryCommandBuffers.userInterfaces[i]));
 		}
+#else
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &secondaryCommandBuffers.ui));
+#endif // UI_COMMAND_ARRAY_CACHE
 
 		threadDatas.resize(numThreads);
 
@@ -335,7 +349,7 @@ public:
 		*/
 		if (starBackgroundCmdBufferCacheDirty)
 		{
-			vkResetCommandBuffer(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex], 0);
+			//vkResetCommandBuffer(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex], 0);
 
 			VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex], &commandBufferBeginInfo));
 			{
@@ -368,6 +382,8 @@ public:
 			With VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS, the primary command buffer's content has to be defined
 			by secondary command buffers, which also applies to the UI overlay command buffer
 		*/
+
+#ifdef UI_COMMAND_ARRAY_CACHE
 		//if (userInterfaceCmdCacheDirty)
 		{
 			//// Inheritance info for the secondary command buffers
@@ -381,8 +397,7 @@ public:
 			//commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
 			//commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
 
-			vkResetCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0);
-
+			//vkResetCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0);
 			VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], &commandBufferBeginInfo));
 			{
 				vkCmdSetViewport(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0, 1, &viewport);
@@ -390,19 +405,30 @@ public:
 
 				vkCmdBindPipeline(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
 
-				if (settings.overlay) {
-					drawUI(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]);
-				}
+				drawUI(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]);
 			}
 			VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]));
-			
+
 			//tempUserInterfaceCmdUpdatedFrameIndex++;
 			//if (tempUserInterfaceCmdUpdatedFrameIndex >= swapChain.imageCount)
 			//{
 			//	tempUserInterfaceCmdUpdatedFrameIndex = 0;
 			//	userInterfaceCmdCacheDirty = false;
 			//}
+	}
+#else
+		VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.ui, &commandBufferBeginInfo));
+		{
+			vkCmdSetViewport(secondaryCommandBuffers.ui, 0, 1, &viewport);
+			vkCmdSetScissor(secondaryCommandBuffers.ui, 0, 1, &scissor);
+
+			vkCmdBindPipeline(secondaryCommandBuffers.ui, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
+
+			drawUI(secondaryCommandBuffers.ui);
 		}
+		VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.ui));
+#endif // UI_COMMAND_ARRAY_CACHE
+
 	}
 
 	void updateSecondaryCommandBuffersForStarBackground()
@@ -426,7 +452,7 @@ public:
 			commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
 			commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
 
-			vkResetCommandBuffer(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex], 0);
+			//vkResetCommandBuffer(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex], 0);
 
 			VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex], &commandBufferBeginInfo));
 			{
@@ -472,22 +498,21 @@ public:
 			commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
 			commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
 
-			vkResetCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0);
-
+			//vkResetCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0);
+#ifdef UI_COMMAND_ARRAY_CACHE
 			VK_CHECK_RESULT(vkBeginCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], &commandBufferBeginInfo));
 			{
+				tempUserInterfaceCmdUpdatedFrameIndex++;
+
 				vkCmdSetViewport(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0, 1, &viewport);
 				vkCmdSetScissor(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], 0, 1, &scissor);
 
 				vkCmdBindPipeline(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
 
-				if (settings.overlay)
+				if (!drawUI(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]))
 				{
-					if (drawUI(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]))
-					{
-						tempUserInterfaceCmdUpdatedFrameIndex++;
-					}//if drawUI
-				}
+					tempUserInterfaceCmdUpdatedFrameIndex = 0;
+				}//if drawUI
 			}
 			VK_CHECK_RESULT(vkEndCommandBuffer(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]));
 
@@ -496,6 +521,7 @@ public:
 				tempUserInterfaceCmdUpdatedFrameIndex = 0;
 				userInterfaceCmdCacheDirty = false;
 			}
+#endif
 		}//if userInterfaceCmdCacheDirty
 	}
 
@@ -573,6 +599,9 @@ public:
 	// that's last submitted to the queue for rendering
 	void updatePrimaryCommandBuffers(VkFramebuffer frameBuffer)
 	{
+		//totalPrimitives = 0;
+		totalPrimitives++;
+
 		// Inheritance info for the secondary command buffers
 		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::GenCommandBufferInheritanceInfo();
 		inheritanceInfo.renderPass = renderPass;
@@ -619,18 +648,17 @@ public:
 			commandBuffers.push_back(secondaryCommandBuffers.backgrounds[currentCmdBufferIndex]);
 		}
 
-		totalPrimitives = 0;
 		// Add a job to the thread's queue for each object to be rendered
 		for (uint32_t t = 0; t < numThreads; t++)
 		{
 			for (uint32_t i = 0; i < numObjectsPerThread; i++)
 			{
-				totalPrimitives++;
 				threadPool.threads[t]->addJob([=] {threadRenderCode(t, i, inheritanceInfo); });
 			}//for_i
 		}//for_t
 		threadPool.wait();
 
+		totalVisibleObjectCount = 0;
 		// Only submit if object is within the current view frustum
 		for (uint32_t t = 0; t < numThreads; t++)
 		{
@@ -638,16 +666,25 @@ public:
 			{
 				if (threadDatas[t].objectDatas[i].visible)
 				{
+					totalVisibleObjectCount++;
 					commandBuffers.push_back(threadDatas[t].commandBuffers[i]);
 				}
 			}//for_i
 		}//for_t
 
 		// Render UI last
-		if (uiOverlay.visible)
+		
+#ifdef UI_COMMAND_ARRAY_CACHE
+		if (uiOverlay.visible && !userInterfaceCmdCacheDirty)
 		{
 			commandBuffers.push_back(secondaryCommandBuffers.userInterfaces[currentCmdBufferIndex]);
 		}
+#else
+		if (uiOverlay.visible)
+		{
+			commandBuffers.push_back(secondaryCommandBuffers.ui);
+		}
+#endif // UI_COMMAND_ARRAY_CACHE
 
 		//使用继承信息分线程录制渲染命令，在主渲染流程中增加Secondary到主渲染命令Buffer中完成真正命令录制
 		// Excute render commands from the secondary command buffer
@@ -699,6 +736,7 @@ public:
 	{
 		if (overlay->header("Statistics")) {
 			overlay->text("Active threads: %d", totalPrimitives);
+			overlay->text("totalVisibleObjectCount: %d", totalVisibleObjectCount);
 		}
 		if (overlay->header("Settings")) {
 			overlay->checkBox("Stars", &displayStarSphere);
