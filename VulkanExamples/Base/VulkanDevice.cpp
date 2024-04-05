@@ -384,11 +384,6 @@ namespace vks
 
 	VkCommandBuffer VulkanDevice::CreateCommandBuffer(VkCommandBufferLevel level, VkCommandPool pool, bool begin)
 	{
-		return CreateCommandBuffer(level,commandPool,begin);
-	}
-
-	VkCommandBuffer VulkanDevice::CreateCommandBuffer(VkCommandBufferLevel level, bool begin)
-	{
 		VkCommandBufferAllocateInfo cmdBufferCreateInfo = vks::initializers::GenCommandBufferAllocateInfo(commandPool, level, 1);
 		VkCommandBuffer cmdBuffer;
 		VK_CHECK_RESULT(vkAllocateCommandBuffers(logicalDevice, &cmdBufferCreateInfo, &cmdBuffer));
@@ -397,10 +392,15 @@ namespace vks
 		if (begin)
 		{
 			VkCommandBufferBeginInfo cmdBeginInfo = vks::initializers::GenCommandBufferBeginInfo();
-			VK_CHECK_RESULT(vkBeginCommandBuffer(cmdBuffer,&cmdBeginInfo));
+			VK_CHECK_RESULT(vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo));
 		}
 
 		return cmdBuffer;
+	}
+
+	VkCommandBuffer VulkanDevice::CreateCommandBuffer(VkCommandBufferLevel level, bool begin)
+	{
+		return CreateCommandBuffer(level, commandPool, begin);
 	}
 
 	void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, VkCommandPool pool, bool free)

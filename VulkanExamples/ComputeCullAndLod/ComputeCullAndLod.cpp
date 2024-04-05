@@ -331,8 +331,8 @@ public:
 		pipelineCreateInfo.pStages = shaderStages.data();
 
 		// Indirect (and instanced) pipeline for the plants
-		shaderStages[0] = loadShader(getShaderPath() + "computecullandlod/indirectdraw.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShaderPath() + "computecullandlod/indirectdraw.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader(getShadersPath() + "computecullandlod/indirectdraw.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader(getShadersPath() + "computecullandlod/indirectdraw.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.plants));
 	}
 
@@ -451,7 +451,7 @@ public:
 
 		// Create pipline
 		VkComputePipelineCreateInfo computePipelineCreateInfo = vks::initializers::GenComputePipelineCreateInfo(compute.pipelineLayout, 0);
-		computePipelineCreateInfo.stage = loadShader(getShaderPath() + "computecullandlod/cull.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT);
+		computePipelineCreateInfo.stage = loadShader(getShadersPath() + "computecullandlod/cull.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT);
 
 		// Use specialization constants to pass max. level of detail(determined by no. of meshes)
 		VkSpecializationMapEntry specializationEntry{};
@@ -484,7 +484,7 @@ public:
 		VkFenceCreateInfo fenceCreateInfo = vks::initializers::GenFenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
 		VK_CHECK_RESULT(vkCreateFence(device, &fenceCreateInfo, nullptr, &compute.fence));
 
-		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::GenSemaphoneCreateInfo();
+		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::GenSemaphoreCreateInfo();
 		VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &compute.semaphore));
 
 		// Build a single command buffer containing the compute dispatch commands

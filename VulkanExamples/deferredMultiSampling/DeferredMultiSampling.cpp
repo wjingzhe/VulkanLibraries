@@ -412,8 +412,8 @@ public:
 		rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
 
 		// With MSAA
-		shaderStages[0] = loadShader(getShaderPath() + "deferredmultisampling/deferred.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShaderPath() + "deferredmultisampling/deferred.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader(getShadersPath() + "deferredmultisampling/deferred.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader(getShadersPath() + "deferredmultisampling/deferred.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 		shaderStages[1].pSpecializationInfo = &specializationInfo;
 		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.deferred));
 
@@ -434,8 +434,8 @@ public:
 		// Separate render pass
 		pipelineCI.renderPass = offscreenframeBuffers->renderPass;
 
-		shaderStages[0] = loadShader(getShaderPath() + "deferredmultisampling/mrt.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShaderPath() + "deferredmultisampling/mrt.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader(getShadersPath() + "deferredmultisampling/mrt.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader(getShadersPath() + "deferredmultisampling/mrt.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		//rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_LINE;
 		//rasterizationStateCreateInfo.lineWidth = 2.0f;
@@ -582,7 +582,7 @@ public:
 		// Create a semaphore used to synchronize offscreen rendering and usage
 		if (offscreenSemaphore == VK_NULL_HANDLE)
 		{
-			VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::GenSemaphoneCreateInfo();
+			VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::GenSemaphoreCreateInfo();
 			VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &offscreenSemaphore));
 		}
 

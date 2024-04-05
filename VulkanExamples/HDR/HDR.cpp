@@ -549,14 +549,14 @@ public:
 		rasterizationStateCI.cullMode = VK_CULL_MODE_NONE;
 		colorBlendStateCI.attachmentCount = 2;
 		colorBlendStateCI.pAttachments = blendAttachmentStates.data();
-		shaderStages[0] = loadShader(getShaderPath() + "hdr/composition.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShaderPath() + "hdr/composition.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader(getShadersPath() + "hdr/composition.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader(getShadersPath() + "hdr/composition.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCI, nullptr, &pipelines.composition));
 
 		
 		// Bloom pass
-		shaderStages[0] = loadShader(getShaderPath() + "hdr/bloom.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShaderPath() + "hdr/bloom.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader(getShadersPath() + "hdr/bloom.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader(getShadersPath() + "hdr/bloom.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 		colorBlendStateCI.attachmentCount = 1;
 		colorBlendStateCI.pAttachments = &blendAttachmentState;
 		blendAttachmentState.colorWriteMask = 0xF;
@@ -590,8 +590,8 @@ public:
 		pipelineCI.renderPass = offscreenFrameBuffer.renderPass;
 		colorBlendStateCI.attachmentCount = 2;
 		colorBlendStateCI.pAttachments = blendAttachmentStates.data();
-		shaderStages[0] = loadShader(getShaderPath() + "hdr/gbuffer.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		shaderStages[1] = loadShader(getShaderPath() + "hdr/gbuffer.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[0] = loadShader(getShadersPath() + "hdr/gbuffer.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader(getShadersPath() + "hdr/gbuffer.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 		// Set constant parameters via specialization constants
 		specializationMapEntries[0] = vks::initializers::GenSpecializationMapEntry(0, 0, sizeof(uint32_t));
 		uint32_t shadertype = 0;

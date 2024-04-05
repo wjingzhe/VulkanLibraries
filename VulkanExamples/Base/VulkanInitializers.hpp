@@ -130,7 +130,7 @@ namespace vks
 			return frameBufferCreateInfo;
 		}
 
-		inline VkSemaphoreCreateInfo GenSemaphoneCreateInfo()
+		inline VkSemaphoreCreateInfo GenSemaphoreCreateInfo()
 		{
 			VkSemaphoreCreateInfo semaphoreCreateInfo{};
 			semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;

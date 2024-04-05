@@ -390,7 +390,7 @@ void VulkanExampleBase::destroyCommandBuffers()
 	vkFreeCommandBuffers(device, cmdPool, static_cast<uint32_t>(drawCmdBuffers.size()), drawCmdBuffers.data());
 }
 
-std::string VulkanExampleBase::getShaderPath() const
+std::string VulkanExampleBase::getShadersPath() const
 {
 	return getAssetPath()+"shaders/"+shaderDir+"/";
 }
@@ -646,7 +646,7 @@ bool VulkanExampleBase::initVulkanSetting()
 	swapChain.connect(instance, physicalDevice, device);
 
 	// Create synchronization objects
-	VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::GenSemaphoneCreateInfo();
+	VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::GenSemaphoreCreateInfo();
 	
 	// Create a semaphore used to synchronize image presentation
 	//Ensure that the image is displayed before we start submitting new commands to the queue
@@ -1262,8 +1262,8 @@ void VulkanExampleBase::prepareForRendering()
 		uiOverlay.queue = queue;
 		uiOverlay.shaders =
 		{
-			loadShader(getShaderPath() + "base/uioverlay.vert.spv",VK_SHADER_STAGE_VERTEX_BIT),
-			loadShader(getShaderPath() + "base/uioverlay.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT),
+			loadShader(getShadersPath() + "base/uioverlay.vert.spv",VK_SHADER_STAGE_VERTEX_BIT),
+			loadShader(getShadersPath() + "base/uioverlay.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT),
 		};
 		uiOverlay.prepareResources();
 		uiOverlay.preparePipeline(pipelineCache, renderPass);

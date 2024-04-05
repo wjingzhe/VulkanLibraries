@@ -117,7 +117,7 @@ private:
 	std::string shaderDir = "glsl";
 protected:
 	// Returns the path to the root of the glsl or hlsl shader directory
-	std::string getShaderPath() const;
+	std::string getShadersPath() const;
 
 	// Frame counter to display fps
 	uint32_t frameCounter = 0;
