@@ -281,9 +281,9 @@ public:
 		vertexInputDescriptions =
 		{
 			// Binding point 0: Mesh vertex layout description at per-vertex rate
-			vks::initializers::GenVertexInputBindingDescripton(VERTEX_BUFFER_BIND_ID,sizeof(vkglTF::Vertex),VK_VERTEX_INPUT_RATE_VERTEX),
+			vks::initializers::GenVertexInputBindingDescription(VERTEX_BUFFER_BIND_ID,sizeof(vkglTF::Vertex),VK_VERTEX_INPUT_RATE_VERTEX),
 			// Binding point 1: Instanced data at per-instance rate
-			vks::initializers::GenVertexInputBindingDescripton(INSTANCE_BUFFER_BIND_ID,sizeof(InstanceData),VK_VERTEX_INPUT_RATE_INSTANCE),
+			vks::initializers::GenVertexInputBindingDescription(INSTANCE_BUFFER_BIND_ID,sizeof(InstanceData),VK_VERTEX_INPUT_RATE_INSTANCE),
 		};
 
 		// Vertex attribute bindings

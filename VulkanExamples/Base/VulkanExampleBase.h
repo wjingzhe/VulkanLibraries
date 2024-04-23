@@ -103,7 +103,7 @@ private:
 	uint32_t destWidth;
 	uint32_t destHeight;
 	bool resizing = false;
-	void windowResize();
+	void resizeWindow();
 	void handleMouseMove(int32_t x, int32_t y);
 	void nextFrame();
 	void updateOverlay();
@@ -123,6 +123,7 @@ protected:
 	uint32_t frameCounter = 0;
 	uint32_t lastFPS = 0;
 	std::chrono::time_point<std::chrono::high_resolution_clock> lastTimestamp;
+	// Vulkan instance, stores all per-application states
 	VkInstance instance;
 	std::vector<std::string> supportedInstanceExtensions;
 	// Physical device(GPU) that Vulkan will use
@@ -137,7 +138,7 @@ protected:
 	VkPhysicalDeviceFeatures curEnabledDeviceFeatures{};
 	std::vector<const char*> enabledDeviceExtensions;
 	std::vector<const char*> enabledInstanceExtensions;
-
+/** @brief Optional pNext structure for passing extension structures to device creation */
 	void* deviceCreateNextChain = nullptr;
 	
 	// logical device, application's view of the physical device(GPU)

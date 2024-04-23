@@ -275,7 +275,7 @@ namespace vks
 
 		// Vertex bindings an attributes based on ImGui vertex definition
 		std::vector<VkVertexInputBindingDescription> vertexInputBindings = {
-			vks::initializers::GenVertexInputBindingDescripton(0, sizeof(ImDrawVert), VK_VERTEX_INPUT_RATE_VERTEX),
+			vks::initializers::GenVertexInputBindingDescription(0, sizeof(ImDrawVert), VK_VERTEX_INPUT_RATE_VERTEX),
 		};
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributes = {
 			vks::initializers::GenVertexInputAttributeDescription(0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(ImDrawVert, pos)),	// Location 0: Position

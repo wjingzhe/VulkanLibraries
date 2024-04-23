@@ -470,7 +470,7 @@ public:
 	{
 		// Binding description
 		vertexInputProperties.bindingDescriptions.resize(1);
-		vertexInputProperties.bindingDescriptions[0] = vks::initializers::GenVertexInputBindingDescripton(VERTEX_BUFFER_BIND_ID, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX);
+		vertexInputProperties.bindingDescriptions[0] = vks::initializers::GenVertexInputBindingDescription(VERTEX_BUFFER_BIND_ID, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX);
 
 		// Attribute descriptions
 		// Describles memory layout and shader positions

@@ -1,4 +1,10 @@
-
+/*
+* Vulkan texture loader
+*
+* Copyright(C) by Sascha Willems - www.saschawillems.de
+*
+* This code is licensed under the MIT license(MIT) (http://opensource.org/licenses/MIT)
+*/
 
 #include "VulkanTexture.h"
 #include <algorithm>
@@ -48,6 +54,18 @@ namespace vks
 		return result;
 	}
 
+	/**
+	* Load a 2D texture including all mip levels
+	*
+	* @param filename File to load (supports .ktx)
+	* @param format Vulkan format of the image data stored in the file
+	* @param device Vulkan device to create the texture on
+	* @param copyQueue Queue used for the texture staging copy commands (must support transfer)
+	* @param (Optional) imageUsageFlags Usage flags for the texture's image (defaults to VK_IMAGE_USAGE_SAMPLED_BIT)
+	* @param (Optional) imageLayout Usage layout for the texture (defaults VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+	* @param (Optional) forceLinear Force linear tiling (not advised, defaults to false)
+	*
+	*/
 	void Texture2D::loadFromFile(std::string fileName, VkFormat format, vks::VulkanDevice * device, VkQueue copyQueue, VkImageUsageFlags imageUsageFlags, VkImageLayout imageLayout, bool forceLinear)
 	{
 		ktxTexture* pKtxTexture;
@@ -66,12 +84,13 @@ namespace vks
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties(device->physicalDevice, format, &formatProperties);
 
-		//Only use linear tiling if requested (and supported by the device)
-		// Support for linear tiling is mostly limited,so prefer to use optimal tiling instead
-		// On most implementations linear tiling will only support a very limited amount
-		// of formats and features(mip maps, cube maps,arrays,etc.)
+		// Only use linear tiling if requested (and supported by the device)
+		// Support for linear tiling is mostly limited, so prefer to use
+		// optimal tiling instead
+		// On most implementations linear tiling will only support a very
+		// limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
 		VkBool32 useStaging = !forceLinear;
-		
+
 		VkMemoryAllocateInfo memAllocInfo = vks::initializers::GenMemoryAllocateInfo();
 		VkMemoryRequirements memReqs;
 
@@ -96,7 +115,7 @@ namespace vks
 			vkGetBufferMemoryRequirements(device->logicalDevice, stagingBuffer, &memReqs);
 
 			memAllocInfo.allocationSize = memReqs.size;
-			//Get memory type index for a host visible buffer
+			// Get memory type index for a host visible buffer
 			memAllocInfo.memoryTypeIndex = device->GetMemoryType(memReqs.memoryTypeBits,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
@@ -142,8 +161,13 @@ namespace vks
 			imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 			imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageCreateInfo.extent = { width,height,1 };
-			imageCreateInfo.usage = imageUsageFlags|VK_IMAGE_USAGE_TRANSFER_DST_BIT;//Ensure that the TRANSFER_DST bit is set staging
+			imageCreateInfo.extent = { width, height, 1 };
+			imageCreateInfo.usage = imageUsageFlags;
+			// Ensure that the TRANSFER_DST bit is set for staging
+			if (!(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
+			{
+				imageCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			}
 			VK_CHECK_RESULT(vkCreateImage(device->logicalDevice, &imageCreateInfo, nullptr, &image));
 
 			vkGetImageMemoryRequirements(device->logicalDevice, image, &memReqs);
@@ -163,7 +187,8 @@ namespace vks
 			vks::tools::setImageLayout(copyCmd, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange);
 
 			//Copy mip levels from staging buffer
-			vkCmdCopyBufferToImage(copyCmd, stagingBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
+			vkCmdCopyBufferToImage(copyCmd, stagingBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
 
 			//Change texture image layout to shader read after all mip levels have been copied
 			this->imageLayout = imageLayout;
@@ -195,6 +220,7 @@ namespace vks
 			imageCreateInfo.arrayLayers = 1;
 			imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 			imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+			imageCreateInfo.usage = imageUsageFlags;
 			imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
@@ -282,11 +308,25 @@ namespace vks
 		viewCreateInfo.image = image;
 		VK_CHECK_RESULT(vkCreateImageView(device->logicalDevice, &viewCreateInfo, nullptr, &view));
 
-		//Update descriptor image info member that can be used for setting up descriptor sets
+		// Update descriptor image info member that can be used for setting up descriptor sets
 		updateDescriptor();
 
 	}	//Texture2D::loadFromFile
 
+	/**
+	* Creates a 2D texture from a buffer
+	*
+	* @param buffer Buffer containing texture data to upload
+	* @param bufferSize Size of the buffer in machine units
+	* @param width Width of the texture to create
+	* @param height Height of the texture to create
+	* @param format Vulkan format of the image data stored in the file
+	* @param device Vulkan device to create the texture on
+	* @param copyQueue Queue used for the texture staging copy commands (must support transfer)
+	* @param (Optional) filter Texture filtering for the sampler (defaults to VK_FILTER_LINEAR)
+	* @param (Optional) imageUsageFlags Usage flags for the texture's image (defaults to VK_IMAGE_USAGE_SAMPLED_BIT)
+	* @param (Optional) imageLayout Usage layout for the texture (defaults VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+	*/
 	void Texture2D::fromBuffer(void * buffer, VkDeviceSize bufferSize, VkFormat format, uint32_t texWidth, uint32_t texHeight, vks::VulkanDevice * device, VkQueue copyQueue, VkFilter filter, VkImageUsageFlags imageUsageFlags, VkImageLayout imageLayout)
 	{
 		assert(buffer);
@@ -386,39 +426,53 @@ namespace vks
 
 		device->FlushCommandBuffer(copyCmd, copyQueue);
 
-		//Clean up staging resources
+		// Clean up staging resources
 		vkFreeMemory(device->logicalDevice, stagingMemory, nullptr);
 		vkDestroyBuffer(device->logicalDevice, stagingBuffer, nullptr);
 
-		//Create sampler
+		// Create sampler
 		VkSamplerCreateInfo samplerCreateInfo = {};
-		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 		samplerCreateInfo.magFilter = filter;
 		samplerCreateInfo.minFilter = filter;
 		samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.mipLodBias = 0.0f;
+		samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
 		samplerCreateInfo.minLod = 0.0f;
 		samplerCreateInfo.maxLod = 0.0f;
 		samplerCreateInfo.maxAnisotropy = 1.0f;
 		VK_CHECK_RESULT(vkCreateSampler(device->logicalDevice, &samplerCreateInfo, nullptr, &sampler));
 
-		//Create image view
+		// Create image view
 		VkImageViewCreateInfo viewCreateInfo = {};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		viewCreateInfo.pNext = NULL;
 		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		viewCreateInfo.format = format;
-		viewCreateInfo.components = { VK_COMPONENT_SWIZZLE_R,VK_COMPONENT_SWIZZLE_G,VK_COMPONENT_SWIZZLE_B,VK_COMPONENT_SWIZZLE_A };
-		viewCreateInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT,0,1,0,1 };
+		viewCreateInfo.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
+		viewCreateInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		viewCreateInfo.subresourceRange.levelCount = 1;
 		viewCreateInfo.image = image;
 		VK_CHECK_RESULT(vkCreateImageView(device->logicalDevice, &viewCreateInfo, nullptr, &view));
 
-		//Update descriptor image info member that can be used for setting up descriptor sets
+		// Update descriptor image info member that can be used for setting up descriptor sets
 		updateDescriptor();
 	}
 
+	/**
+	* Load a 2D texture array including all mip levels
+	*
+	* @param filename File to load (supports .ktx)
+	* @param format Vulkan format of the image data stored in the file
+	* @param device Vulkan device to create the texture on
+	* @param copyQueue Queue used for the texture staging copy commands (must support transfer)
+	* @param (Optional) imageUsageFlags Usage flags for the texture's image (defaults to VK_IMAGE_USAGE_SAMPLED_BIT)
+	* @param (Optional) imageLayout Usage layout for the texture (defaults VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+	*
+	*/
 	void Texture2DArray::loadFromFile(std::string fileName, VkFormat format, vks::VulkanDevice * device, VkQueue copyQueue, VkImageUsageFlags imageUsageFlags, VkImageLayout imageLayout)
 	{
 		ktxTexture* pKtxTexture;
@@ -445,7 +499,7 @@ namespace vks
 		bufferCreateInfo.size = ktxTextureSize;
 		//This buffer is used as a transfer source for the buffer copy
 		bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		bufferCreateInfo.usage = VK_SHARING_MODE_EXCLUSIVE;
+		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;//buffer转化出错的bug原因
 
 		VK_CHECK_RESULT(vkCreateBuffer(device->logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
 
@@ -498,11 +552,11 @@ namespace vks
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.extent = { width,height,1 };
+		imageCreateInfo.extent = { width, height, 1 };
 		imageCreateInfo.usage = imageUsageFlags;
 
 		// Ensure that the TRANSFER_DST bit is set for staging
-		if ( !(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT) )
+		if (!(imageCreateInfo.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
 		{
 			imageCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		}
@@ -535,6 +589,7 @@ namespace vks
 		// Copy the layers and mip levels from the staging buffer to the optimal tiled image
 		vkCmdCopyBufferToImage(copyCmd, stagingBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, static_cast<uint32_t>(bufferCopyRegions.size()), bufferCopyRegions.data());
 
+		// Change texture image layout to shader read after all faces have been copied
 		this->imageLayout = imageLayout;
 		vks::tools::setImageLayout(copyCmd, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageLayout, subresourceRange);
 
@@ -559,7 +614,7 @@ namespace vks
 
 		// Create image view
 		VkImageViewCreateInfo viewCreateInfo = vks::initializers::GenImageViewCreateInfo();
-		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
 		viewCreateInfo.format = format;
 		viewCreateInfo.components = { VK_COMPONENT_SWIZZLE_R,VK_COMPONENT_SWIZZLE_G,VK_COMPONENT_SWIZZLE_B,VK_COMPONENT_SWIZZLE_A };
 		viewCreateInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT,0,1,0,1 };
@@ -577,6 +632,17 @@ namespace vks
 		updateDescriptor();
 	}//loadFromFile
 
+	/**
+	* Load a cubemap texture including all mip levels from a single file
+	*
+	* @param filename File to load (supports .ktx)
+	* @param format Vulkan format of the image data stored in the file
+	* @param device Vulkan device to create the texture on
+	* @param copyQueue Queue used for the texture staging copy commands (must support transfer)
+	* @param (Optional) imageUsageFlags Usage flags for the texture's image (defaults to VK_IMAGE_USAGE_SAMPLED_BIT)
+	* @param (Optional) imageLayout Usage layout for the texture (defaults VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+	*
+	*/
 	void TextureCubeMap::loadFromFile(std::string fileName, VkFormat format, vks::VulkanDevice * device, VkQueue copyQueue, VkImageUsageFlags imageUsageFlags, VkImageLayout imageLayout)
 	{
 		ktxTexture* pKtxTexture;
@@ -654,7 +720,7 @@ namespace vks
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.extent = { width,height,1 };
+		imageCreateInfo.extent = { width, height, 1 };
 		imageCreateInfo.usage = imageUsageFlags;
 
 		// Ensure that the TRANSFER_DST bit is set for staging
@@ -699,6 +765,7 @@ namespace vks
 
 		device->FlushCommandBuffer(copyCmd, copyQueue);
 
+        // Create sampler
 		VkSamplerCreateInfo samplerCreateInfo = vks::initializers::GenSamplerCreateInfo();
 		samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
 		samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
@@ -709,6 +776,7 @@ namespace vks
 		samplerCreateInfo.mipLodBias = 0.0f;
 		samplerCreateInfo.maxAnisotropy = device->m_enabledDeviceFeatures.samplerAnisotropy ? device->properties.limits.maxSamplerAnisotropy : 1.0f;
 		samplerCreateInfo.anisotropyEnable = device->m_enabledDeviceFeatures.samplerAnisotropy;
+        samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
 		samplerCreateInfo.minLod = 0.0f;
 		samplerCreateInfo.maxLod = (float)mipLevels;
 		samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;

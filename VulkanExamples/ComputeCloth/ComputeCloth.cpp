@@ -402,7 +402,7 @@ public:
 		// Binding descripton
 		std::vector<VkVertexInputBindingDescription> inputBindings =
 		{
-			vks::initializers::GenVertexInputBindingDescripton(0,sizeof(Particle),VK_VERTEX_INPUT_RATE_VERTEX)
+			vks::initializers::GenVertexInputBindingDescription(0,sizeof(Particle),VK_VERTEX_INPUT_RATE_VERTEX)
 		};
 
 		// Attribute descriptions

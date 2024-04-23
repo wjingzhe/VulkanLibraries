@@ -28,7 +28,7 @@ bool loadImageDataFunc(tinygltf::Image* image,const int imageIndex,std::string* 
 	// KTX files will be handled by our own code
 	if (image->uri.find_last_not_of(".")!=std::string::npos)
 	{
-		if (image->uri.substr(image->uri.find_last_not_of(".")+1)=="ktx")
+		if (image->uri.substr(image->uri.find_last_of(".")+1)=="ktx")
 		{
 			return true;
 		}
@@ -40,12 +40,12 @@ bool loadImageDataFunc(tinygltf::Image* image,const int imageIndex,std::string* 
 bool loadImageDataFuncEmpty(tinygltf::Image* image,const int imageIndex,std::string* error,std::string* warning,int req_width,int req_height,
 	const unsigned char*bytes,int size,void* pUserData)
 {
-	//This function will be used for samples that don't require images to be loaded
+	// This function will be used for samples that don't require images to be loaded
 	return true;
 }
 
 /*
-glTF texture loading class
+	glTF texture loading class
 */
 void vkglTF::Texture::updateDescriptor()
 {
@@ -509,6 +509,9 @@ void vkglTF::Material::createDescriptorSet(VkDescriptorPool descriptorPool, VkDe
 	vkUpdateDescriptorSets(device->logicalDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 }//createDescriptorSet
 
+/*
+	glTF primitive
+*/
 void vkglTF::Primitive::setDimensions(glm::vec3 min, glm::vec3 max)
 {
 	dimensions.min = min;
@@ -518,6 +521,9 @@ void vkglTF::Primitive::setDimensions(glm::vec3 min, glm::vec3 max)
 	dimensions.radius = glm::distance(min, max) / 2.0f;
 }
 
+/*
+	glTF mesh
+*/
 vkglTF::Mesh::Mesh(vks::VulkanDevice * device, glm::mat4 matrix)
 {
 	this->device = device;
@@ -625,28 +631,27 @@ VkVertexInputAttributeDescription vkglTF::Vertex::GenVertexInputAttributeDescrip
 	{
 	case vkglTF::VertexComponent::Position:
 		return VkVertexInputAttributeDescription({ locationIndex,binding,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,pos)});
-		break;
+
 	case vkglTF::VertexComponent::Normal:
 		return VkVertexInputAttributeDescription({ locationIndex,binding,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,normal) });
-		break;
+
 	case vkglTF::VertexComponent::UV:
 		return VkVertexInputAttributeDescription({ locationIndex,binding,VK_FORMAT_R32G32_SFLOAT,offsetof(Vertex,uv) });
-		break;
+
 	case vkglTF::VertexComponent::Color:
 		return VkVertexInputAttributeDescription({ locationIndex,binding,VK_FORMAT_R32G32B32A32_SFLOAT,offsetof(Vertex,color) });
-		break;
+
 	case vkglTF::VertexComponent::Tangent:
 		return VkVertexInputAttributeDescription({ locationIndex,binding,VK_FORMAT_R32G32B32A32_SFLOAT,offsetof(Vertex,tangent) });
-		break;
+
 	case vkglTF::VertexComponent::Joint0:
 		return VkVertexInputAttributeDescription({ locationIndex,binding,VK_FORMAT_R32G32B32A32_SFLOAT,offsetof(Vertex,joint0) });
-		break;
+
 	case vkglTF::VertexComponent::Weight0:
 		return VkVertexInputAttributeDescription({ locationIndex,binding,VK_FORMAT_R32G32B32A32_SFLOAT,offsetof(Vertex,weight0) });
-		break;
+
 	default:
 		return VkVertexInputAttributeDescription();
-		break;
 	}
 }
 
@@ -662,6 +667,7 @@ std::vector<VkVertexInputAttributeDescription> vkglTF::Vertex::inputAttributeDes
 	return result;
 }
 
+/** @brief Returns the default pipeline vertex input state create info structure for the requested vertex components */
 VkPipelineVertexInputStateCreateInfo * vkglTF::Vertex::getPipelineVertexInputState(const std::vector<VertexComponent> components)
 {
 	vertexInputBindingDescription = Vertex::inputBindingDescription(0);
@@ -1338,7 +1344,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice * devic
 	}
 
 #if defined(__ANDROID__)
-	// On Android all assets are packed with apk in a compressed form,so we need to open them using the asset manager
+	// On Android all assets are packed with the apk in a compressed form, so we need to open them using the asset manager
 	// We let tinygltf handle this, by passing the asset manager of our app
 	tinygltf::asset_manager = androidApp->activity->assetManager;
 #endif
@@ -1349,7 +1355,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice * devic
 	this->device = device;
 
 #if defined(__ANDROID__)
-	// On Android all assets are packed with apk in a compressed form,so we need to open them using the asset manager
+	// On Android all assets are packed with the apk in a compressed form, so we need to open them using the asset manager
 	// We let tinygltf handle this, by passing the asset manager of our app
 	tinygltf::asset_manager = androidApp->activity->assetManager;
 	//jingz 这里代码肯定有问题
@@ -1549,8 +1555,7 @@ void vkglTF::Model::loadFromFile(std::string filename, vks::VulkanDevice * devic
 	descriptorPoolCI.maxSets = uboCount + imageCount;
 	VK_CHECK_RESULT(vkCreateDescriptorPool(device->logicalDevice, &descriptorPoolCI, nullptr, &descriptorPool));
 
-
-	// Descriptor for per-node uniform buffers
+	// Descriptors for per-node uniform buffers
 	{
 		// layout is global,so only create if it hasn't already been created before
 		if (descriptorSetLayoutUbo == VK_NULL_HANDLE)

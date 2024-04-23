@@ -17,6 +17,13 @@ namespace vks
 		}
 	}
 
+	/** 
+	* Attach the allocated memory block to the buffer
+	* 
+	* @param offset (Optional) Byte offset (from the beginning) for the memory region to bind
+	* 
+	* @return VkResult of the bindBufferMemory call
+	*/
 	VkResult Buffer::bind(VkDeviceSize offset)
 	{
 		return vkBindBufferMemory(device,buffer,deviceMemory,offset);
@@ -70,7 +77,4 @@ namespace vks
 		}
 	}
 
-
 }// namespace vks
-
-

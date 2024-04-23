@@ -316,7 +316,7 @@ namespace vks
 			return writeDescriptorSet;
 		}
 
-		inline VkVertexInputBindingDescription GenVertexInputBindingDescripton(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate)
+		inline VkVertexInputBindingDescription GenVertexInputBindingDescription(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate)
 		{
 			VkVertexInputBindingDescription vertexInputBindingDescription{};
 			vertexInputBindingDescription.binding = binding;
@@ -365,11 +365,11 @@ namespace vks
 			return pipelineInputAssemblyStateCreateInfo;
 		}
 
-		inline VkPipelineRasterizationStateCreateInfo GenPipelineRasterizationStateCreateInfo(VkPolygonMode pologonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipelineInputAssemblyStateCreateFlags flags = 0)
+		inline VkPipelineRasterizationStateCreateInfo GenPipelineRasterizationStateCreateInfo(VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipelineInputAssemblyStateCreateFlags flags = 0)
 		{
 			VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
 			pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-			pipelineRasterizationStateCreateInfo.polygonMode = pologonMode;
+			pipelineRasterizationStateCreateInfo.polygonMode = polygonMode;
 			pipelineRasterizationStateCreateInfo.cullMode = cullMode;
 			pipelineRasterizationStateCreateInfo.frontFace = frontFace;
 			pipelineRasterizationStateCreateInfo.flags = flags;
@@ -445,11 +445,11 @@ namespace vks
 			return pipelineDynamicStateCreateInfo;
 		}
 
-		inline VkPipelineTessellationStateCreateInfo GenPipelineTessellationStateCreateInfo(uint32_t pathControlPoints)
+		inline VkPipelineTessellationStateCreateInfo GenPipelineTessellationStateCreateInfo(uint32_t patchControlPoints)
 		{
 			VkPipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo{};
 			pipelineTessellationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
-			pipelineTessellationStateCreateInfo.patchControlPoints = pathControlPoints;
+			pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
 			return pipelineTessellationStateCreateInfo;
 		}
 
@@ -551,9 +551,9 @@ namespace vks
 
 		inline VkRayTracingShaderGroupCreateInfoKHR GenRayTracingShaderGroupCreateInfoKHR()
 		{
-			VkRayTracingShaderGroupCreateInfoKHR rayTracingShaderGroupCreateInfoHKR{};
-			rayTracingShaderGroupCreateInfoHKR.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
-			return rayTracingShaderGroupCreateInfoHKR;
+			VkRayTracingShaderGroupCreateInfoKHR rayTracingShaderGroupCreateInfoKHR{};
+			rayTracingShaderGroupCreateInfoKHR.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+			return rayTracingShaderGroupCreateInfoKHR;
 		}
 
 		inline VkRayTracingPipelineCreateInfoKHR GenRayTracingPipelineCreateInfoKHR()

@@ -243,7 +243,7 @@ public:
 		//Bind descriptions
 		vertices.bindingDescriptions =
 		{
-			vks::initializers::GenVertexInputBindingDescripton(VERTEX_BUFFER_BIND_ID,sizeof(Vertex),VK_VERTEX_INPUT_RATE_VERTEX),
+			vks::initializers::GenVertexInputBindingDescription(VERTEX_BUFFER_BIND_ID,sizeof(Vertex),VK_VERTEX_INPUT_RATE_VERTEX),
 		};
 
 		// Attribute descriptions
